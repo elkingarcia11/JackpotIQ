@@ -8,12 +8,23 @@
 
 /* Begin PBXBuildFile section */
 		1E9DE1882D98DE0D003B43AA /* JackpotIQApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1872D98DE0D003B43AA /* JackpotIQApp.swift */; };
-		1E9DE18A2D98DE0D003B43AA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1892D98DE0D003B43AA /* ContentView.swift */; };
 		1E9DE18C2D98DE0E003B43AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E9DE18B2D98DE0E003B43AA /* Assets.xcassets */; };
 		1E9DE18F2D98DE0E003B43AA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E9DE18E2D98DE0E003B43AA /* Preview Assets.xcassets */; };
 		1E9DE1992D98DE0E003B43AA /* JackpotIQTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1982D98DE0E003B43AA /* JackpotIQTests.swift */; };
 		1E9DE1A32D98DE0E003B43AA /* JackpotIQUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1A22D98DE0E003B43AA /* JackpotIQUITests.swift */; };
 		1E9DE1A52D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1A42D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift */; };
+		1E9DE1B32D98DE55003B43AA /* LotteryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1B22D98DE55003B43AA /* LotteryModels.swift */; };
+		1E9DE1B62D98DE79003B43AA /* LotteryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1B52D98DE79003B43AA /* LotteryViewModel.swift */; };
+		1E9DE1B92D98DEB9003B43AA /* LotteryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1B82D98DEB9003B43AA /* LotteryView.swift */; };
+		1E9DE1BD2D98DF01003B43AA /* NumberBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1BC2D98DF01003B43AA /* NumberBubble.swift */; };
+		1E9DE1BF2D98DF1D003B43AA /* FrequencyChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1BE2D98DF1D003B43AA /* FrequencyChart.swift */; };
+		1E9DE1C12D98DF28003B43AA /* FrequencyChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1C02D98DF28003B43AA /* FrequencyChartsView.swift */; };
+		1E9DE1C32D98DF35003B43AA /* GenerateNumbersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1C22D98DF35003B43AA /* GenerateNumbersView.swift */; };
+		1E9DE1C52D98DF46003B43AA /* LatestNumbersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1C42D98DF46003B43AA /* LatestNumbersView.swift */; };
+		1E9DE1C72D98DF54003B43AA /* LotteryResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1C62D98DF54003B43AA /* LotteryResultView.swift */; };
+		1E9DE1C92D98DF67003B43AA /* NumberGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1C82D98DF67003B43AA /* NumberGrid.swift */; };
+		1E9DE1CB2D98DF75003B43AA /* SearchNumbersSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1CA2D98DF75003B43AA /* SearchNumbersSheet.swift */; };
+		1E9DE1CE2D98DFBD003B43AA /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1CD2D98DFBD003B43AA /* NetworkService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,7 +47,6 @@
 /* Begin PBXFileReference section */
 		1E9DE1842D98DE0D003B43AA /* JackpotIQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JackpotIQ.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E9DE1872D98DE0D003B43AA /* JackpotIQApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JackpotIQApp.swift; sourceTree = "<group>"; };
-		1E9DE1892D98DE0D003B43AA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1E9DE18B2D98DE0E003B43AA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1E9DE18E2D98DE0E003B43AA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1E9DE1942D98DE0E003B43AA /* JackpotIQTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JackpotIQTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,6 +54,18 @@
 		1E9DE19E2D98DE0E003B43AA /* JackpotIQUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JackpotIQUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E9DE1A22D98DE0E003B43AA /* JackpotIQUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JackpotIQUITests.swift; sourceTree = "<group>"; };
 		1E9DE1A42D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JackpotIQUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		1E9DE1B22D98DE55003B43AA /* LotteryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LotteryModels.swift; sourceTree = "<group>"; };
+		1E9DE1B52D98DE79003B43AA /* LotteryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LotteryViewModel.swift; sourceTree = "<group>"; };
+		1E9DE1B82D98DEB9003B43AA /* LotteryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LotteryView.swift; sourceTree = "<group>"; };
+		1E9DE1BC2D98DF01003B43AA /* NumberBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberBubble.swift; sourceTree = "<group>"; };
+		1E9DE1BE2D98DF1D003B43AA /* FrequencyChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequencyChart.swift; sourceTree = "<group>"; };
+		1E9DE1C02D98DF28003B43AA /* FrequencyChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequencyChartsView.swift; sourceTree = "<group>"; };
+		1E9DE1C22D98DF35003B43AA /* GenerateNumbersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateNumbersView.swift; sourceTree = "<group>"; };
+		1E9DE1C42D98DF46003B43AA /* LatestNumbersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatestNumbersView.swift; sourceTree = "<group>"; };
+		1E9DE1C62D98DF54003B43AA /* LotteryResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LotteryResultView.swift; sourceTree = "<group>"; };
+		1E9DE1C82D98DF67003B43AA /* NumberGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberGrid.swift; sourceTree = "<group>"; };
+		1E9DE1CA2D98DF75003B43AA /* SearchNumbersSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchNumbersSheet.swift; sourceTree = "<group>"; };
+		1E9DE1CD2D98DFBD003B43AA /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,8 +116,11 @@
 		1E9DE1862D98DE0D003B43AA /* JackpotIQ */ = {
 			isa = PBXGroup;
 			children = (
+				1E9DE1CC2D98DFB1003B43AA /* Services */,
+				1E9DE1B72D98DEA9003B43AA /* Views */,
+				1E9DE1B42D98DE6A003B43AA /* ViewModels */,
+				1E9DE1B12D98DE15003B43AA /* Models */,
 				1E9DE1872D98DE0D003B43AA /* JackpotIQApp.swift */,
-				1E9DE1892D98DE0D003B43AA /* ContentView.swift */,
 				1E9DE18B2D98DE0E003B43AA /* Assets.xcassets */,
 				1E9DE18D2D98DE0E003B43AA /* Preview Content */,
 			);
@@ -125,6 +150,62 @@
 				1E9DE1A42D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift */,
 			);
 			path = JackpotIQUITests;
+			sourceTree = "<group>";
+		};
+		1E9DE1B12D98DE15003B43AA /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1B22D98DE55003B43AA /* LotteryModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1E9DE1B42D98DE6A003B43AA /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1B52D98DE79003B43AA /* LotteryViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		1E9DE1B72D98DEA9003B43AA /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1BA2D98DEEC003B43AA /* Components */,
+				1E9DE1B82D98DEB9003B43AA /* LotteryView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		1E9DE1BA2D98DEEC003B43AA /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1BB2D98DEF2003B43AA /* Shared */,
+				1E9DE1BE2D98DF1D003B43AA /* FrequencyChart.swift */,
+				1E9DE1C22D98DF35003B43AA /* GenerateNumbersView.swift */,
+				1E9DE1C42D98DF46003B43AA /* LatestNumbersView.swift */,
+				1E9DE1C62D98DF54003B43AA /* LotteryResultView.swift */,
+				1E9DE1C82D98DF67003B43AA /* NumberGrid.swift */,
+				1E9DE1CA2D98DF75003B43AA /* SearchNumbersSheet.swift */,
+				1E9DE1C02D98DF28003B43AA /* FrequencyChartsView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		1E9DE1BB2D98DEF2003B43AA /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1BC2D98DF01003B43AA /* NumberBubble.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		1E9DE1CC2D98DFB1003B43AA /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1CD2D98DFBD003B43AA /* NetworkService.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -257,8 +338,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E9DE18A2D98DE0D003B43AA /* ContentView.swift in Sources */,
+				1E9DE1BD2D98DF01003B43AA /* NumberBubble.swift in Sources */,
+				1E9DE1BF2D98DF1D003B43AA /* FrequencyChart.swift in Sources */,
+				1E9DE1CB2D98DF75003B43AA /* SearchNumbersSheet.swift in Sources */,
+				1E9DE1B62D98DE79003B43AA /* LotteryViewModel.swift in Sources */,
+				1E9DE1C12D98DF28003B43AA /* FrequencyChartsView.swift in Sources */,
+				1E9DE1B32D98DE55003B43AA /* LotteryModels.swift in Sources */,
+				1E9DE1B92D98DEB9003B43AA /* LotteryView.swift in Sources */,
+				1E9DE1C72D98DF54003B43AA /* LotteryResultView.swift in Sources */,
+				1E9DE1C32D98DF35003B43AA /* GenerateNumbersView.swift in Sources */,
+				1E9DE1C52D98DF46003B43AA /* LatestNumbersView.swift in Sources */,
 				1E9DE1882D98DE0D003B43AA /* JackpotIQApp.swift in Sources */,
+				1E9DE1CE2D98DFBD003B43AA /* NetworkService.swift in Sources */,
+				1E9DE1C92D98DF67003B43AA /* NumberGrid.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
