@@ -1,0 +1,593 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1E9DE1882D98DE0D003B43AA /* JackpotIQApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1872D98DE0D003B43AA /* JackpotIQApp.swift */; };
+		1E9DE18A2D98DE0D003B43AA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1892D98DE0D003B43AA /* ContentView.swift */; };
+		1E9DE18C2D98DE0E003B43AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E9DE18B2D98DE0E003B43AA /* Assets.xcassets */; };
+		1E9DE18F2D98DE0E003B43AA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E9DE18E2D98DE0E003B43AA /* Preview Assets.xcassets */; };
+		1E9DE1992D98DE0E003B43AA /* JackpotIQTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1982D98DE0E003B43AA /* JackpotIQTests.swift */; };
+		1E9DE1A32D98DE0E003B43AA /* JackpotIQUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1A22D98DE0E003B43AA /* JackpotIQUITests.swift */; };
+		1E9DE1A52D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1A42D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1E9DE1952D98DE0E003B43AA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DE17C2D98DE0D003B43AA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1E9DE1832D98DE0D003B43AA;
+			remoteInfo = JackpotIQ;
+		};
+		1E9DE19F2D98DE0E003B43AA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DE17C2D98DE0D003B43AA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1E9DE1832D98DE0D003B43AA;
+			remoteInfo = JackpotIQ;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1E9DE1842D98DE0D003B43AA /* JackpotIQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JackpotIQ.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E9DE1872D98DE0D003B43AA /* JackpotIQApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JackpotIQApp.swift; sourceTree = "<group>"; };
+		1E9DE1892D98DE0D003B43AA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1E9DE18B2D98DE0E003B43AA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1E9DE18E2D98DE0E003B43AA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		1E9DE1942D98DE0E003B43AA /* JackpotIQTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JackpotIQTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E9DE1982D98DE0E003B43AA /* JackpotIQTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JackpotIQTests.swift; sourceTree = "<group>"; };
+		1E9DE19E2D98DE0E003B43AA /* JackpotIQUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JackpotIQUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E9DE1A22D98DE0E003B43AA /* JackpotIQUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JackpotIQUITests.swift; sourceTree = "<group>"; };
+		1E9DE1A42D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JackpotIQUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1E9DE1812D98DE0D003B43AA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E9DE1912D98DE0E003B43AA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E9DE19B2D98DE0E003B43AA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1E9DE17B2D98DE0D003B43AA = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1862D98DE0D003B43AA /* JackpotIQ */,
+				1E9DE1972D98DE0E003B43AA /* JackpotIQTests */,
+				1E9DE1A12D98DE0E003B43AA /* JackpotIQUITests */,
+				1E9DE1852D98DE0D003B43AA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1E9DE1852D98DE0D003B43AA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1842D98DE0D003B43AA /* JackpotIQ.app */,
+				1E9DE1942D98DE0E003B43AA /* JackpotIQTests.xctest */,
+				1E9DE19E2D98DE0E003B43AA /* JackpotIQUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1E9DE1862D98DE0D003B43AA /* JackpotIQ */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1872D98DE0D003B43AA /* JackpotIQApp.swift */,
+				1E9DE1892D98DE0D003B43AA /* ContentView.swift */,
+				1E9DE18B2D98DE0E003B43AA /* Assets.xcassets */,
+				1E9DE18D2D98DE0E003B43AA /* Preview Content */,
+			);
+			path = JackpotIQ;
+			sourceTree = "<group>";
+		};
+		1E9DE18D2D98DE0E003B43AA /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE18E2D98DE0E003B43AA /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		1E9DE1972D98DE0E003B43AA /* JackpotIQTests */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1982D98DE0E003B43AA /* JackpotIQTests.swift */,
+			);
+			path = JackpotIQTests;
+			sourceTree = "<group>";
+		};
+		1E9DE1A12D98DE0E003B43AA /* JackpotIQUITests */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DE1A22D98DE0E003B43AA /* JackpotIQUITests.swift */,
+				1E9DE1A42D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift */,
+			);
+			path = JackpotIQUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1E9DE1832D98DE0D003B43AA /* JackpotIQ */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E9DE1A82D98DE0E003B43AA /* Build configuration list for PBXNativeTarget "JackpotIQ" */;
+			buildPhases = (
+				1E9DE1802D98DE0D003B43AA /* Sources */,
+				1E9DE1812D98DE0D003B43AA /* Frameworks */,
+				1E9DE1822D98DE0D003B43AA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JackpotIQ;
+			productName = JackpotIQ;
+			productReference = 1E9DE1842D98DE0D003B43AA /* JackpotIQ.app */;
+			productType = "com.apple.product-type.application";
+		};
+		1E9DE1932D98DE0E003B43AA /* JackpotIQTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E9DE1AB2D98DE0E003B43AA /* Build configuration list for PBXNativeTarget "JackpotIQTests" */;
+			buildPhases = (
+				1E9DE1902D98DE0E003B43AA /* Sources */,
+				1E9DE1912D98DE0E003B43AA /* Frameworks */,
+				1E9DE1922D98DE0E003B43AA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1E9DE1962D98DE0E003B43AA /* PBXTargetDependency */,
+			);
+			name = JackpotIQTests;
+			productName = JackpotIQTests;
+			productReference = 1E9DE1942D98DE0E003B43AA /* JackpotIQTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		1E9DE19D2D98DE0E003B43AA /* JackpotIQUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E9DE1AE2D98DE0E003B43AA /* Build configuration list for PBXNativeTarget "JackpotIQUITests" */;
+			buildPhases = (
+				1E9DE19A2D98DE0E003B43AA /* Sources */,
+				1E9DE19B2D98DE0E003B43AA /* Frameworks */,
+				1E9DE19C2D98DE0E003B43AA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1E9DE1A02D98DE0E003B43AA /* PBXTargetDependency */,
+			);
+			name = JackpotIQUITests;
+			productName = JackpotIQUITests;
+			productReference = 1E9DE19E2D98DE0E003B43AA /* JackpotIQUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1E9DE17C2D98DE0D003B43AA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					1E9DE1832D98DE0D003B43AA = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					1E9DE1932D98DE0E003B43AA = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 1E9DE1832D98DE0D003B43AA;
+					};
+					1E9DE19D2D98DE0E003B43AA = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 1E9DE1832D98DE0D003B43AA;
+					};
+				};
+			};
+			buildConfigurationList = 1E9DE17F2D98DE0D003B43AA /* Build configuration list for PBXProject "JackpotIQ" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1E9DE17B2D98DE0D003B43AA;
+			productRefGroup = 1E9DE1852D98DE0D003B43AA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1E9DE1832D98DE0D003B43AA /* JackpotIQ */,
+				1E9DE1932D98DE0E003B43AA /* JackpotIQTests */,
+				1E9DE19D2D98DE0E003B43AA /* JackpotIQUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1E9DE1822D98DE0D003B43AA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E9DE18F2D98DE0E003B43AA /* Preview Assets.xcassets in Resources */,
+				1E9DE18C2D98DE0E003B43AA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E9DE1922D98DE0E003B43AA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E9DE19C2D98DE0E003B43AA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1E9DE1802D98DE0D003B43AA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E9DE18A2D98DE0D003B43AA /* ContentView.swift in Sources */,
+				1E9DE1882D98DE0D003B43AA /* JackpotIQApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E9DE1902D98DE0E003B43AA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E9DE1992D98DE0E003B43AA /* JackpotIQTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E9DE19A2D98DE0E003B43AA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E9DE1A32D98DE0E003B43AA /* JackpotIQUITests.swift in Sources */,
+				1E9DE1A52D98DE0E003B43AA /* JackpotIQUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1E9DE1962D98DE0E003B43AA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1E9DE1832D98DE0D003B43AA /* JackpotIQ */;
+			targetProxy = 1E9DE1952D98DE0E003B43AA /* PBXContainerItemProxy */;
+		};
+		1E9DE1A02D98DE0E003B43AA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1E9DE1832D98DE0D003B43AA /* JackpotIQ */;
+			targetProxy = 1E9DE19F2D98DE0E003B43AA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1E9DE1A62D98DE0E003B43AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1E9DE1A72D98DE0E003B43AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		1E9DE1A92D98DE0E003B43AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"JackpotIQ/Preview Content\"";
+				DEVELOPMENT_TEAM = 49AKYU26GJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elkingarcia.JackpotIQ;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1E9DE1AA2D98DE0E003B43AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"JackpotIQ/Preview Content\"";
+				DEVELOPMENT_TEAM = 49AKYU26GJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elkingarcia.JackpotIQ;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		1E9DE1AC2D98DE0E003B43AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49AKYU26GJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elkingarcia.JackpotIQTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JackpotIQ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JackpotIQ";
+			};
+			name = Debug;
+		};
+		1E9DE1AD2D98DE0E003B43AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49AKYU26GJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elkingarcia.JackpotIQTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JackpotIQ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JackpotIQ";
+			};
+			name = Release;
+		};
+		1E9DE1AF2D98DE0E003B43AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49AKYU26GJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elkingarcia.JackpotIQUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = JackpotIQ;
+			};
+			name = Debug;
+		};
+		1E9DE1B02D98DE0E003B43AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49AKYU26GJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elkingarcia.JackpotIQUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = JackpotIQ;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E9DE17F2D98DE0D003B43AA /* Build configuration list for PBXProject "JackpotIQ" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E9DE1A62D98DE0E003B43AA /* Debug */,
+				1E9DE1A72D98DE0E003B43AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1E9DE1A82D98DE0E003B43AA /* Build configuration list for PBXNativeTarget "JackpotIQ" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E9DE1A92D98DE0E003B43AA /* Debug */,
+				1E9DE1AA2D98DE0E003B43AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1E9DE1AB2D98DE0E003B43AA /* Build configuration list for PBXNativeTarget "JackpotIQTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E9DE1AC2D98DE0E003B43AA /* Debug */,
+				1E9DE1AD2D98DE0E003B43AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1E9DE1AE2D98DE0E003B43AA /* Build configuration list for PBXNativeTarget "JackpotIQUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E9DE1AF2D98DE0E003B43AA /* Debug */,
+				1E9DE1B02D98DE0E003B43AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1E9DE17C2D98DE0D003B43AA /* Project object */;
+}
