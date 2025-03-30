@@ -27,7 +27,8 @@ struct ContentView: View {
                     } label: {
                         LotteryButton(
                             image: "MegaMillions",
-                            color: .green
+                            color: Color(hex: "#21AB4B"),  // Mega Millions green
+                            accessibilityLabel: "Play Mega Millions"
                         )
                     }
                     
@@ -36,7 +37,8 @@ struct ContentView: View {
                     } label: {
                         LotteryButton(
                             image: "Powerball",
-                            color: .red
+                            color: Color(hex: "#D43333"),  // Powerball red
+                            accessibilityLabel: "Play Powerball"
                         )
                     }
                 }
@@ -44,17 +46,6 @@ struct ContentView: View {
                 
                 Spacer()
             }
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color(hex: "ADD8E6"),  // Light blue
-                        Color(hex: "90EE90")   // Light green
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-            )
         }
     }
 }
@@ -62,6 +53,8 @@ struct ContentView: View {
 struct LotteryButton: View {
     let image: String
     let color: Color
+    let accessibilityLabel: String
+    @State private var isPressed = false
     
     var body: some View {
         HStack {
@@ -70,12 +63,62 @@ struct LotteryButton: View {
                 .scaledToFit()
                 .frame(height: 44)
                 .foregroundColor(color)
+                .padding(.horizontal, 4)
         }
         .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.systemBackground))
+        .padding(.vertical, 16)
+        .padding(.horizontal, 20)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground))
+                
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                color.opacity(0.15),
+                                color.opacity(0.05)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(
+                        color.opacity(0.3),
+                        lineWidth: 1
+                    )
+            }
+        )
         .cornerRadius(12)
-        .shadow(radius: 2, y: 1)
+        .shadow(
+            color: color.opacity(0.3),
+            radius: isPressed ? 2 : 5,
+            x: 0,
+            y: isPressed ? 1 : 2
+        )
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+        .accessibilityLabel(accessibilityLabel)
+        .pressEvents {
+            isPressed = true
+        } onRelease: {
+            isPressed = false
+        }
+    }
+}
+
+// Helper for button press gestures
+extension View {
+    func pressEvents(onPress: @escaping () -> Void, onRelease: @escaping () -> Void) -> some View {
+        self
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in onPress() }
+                    .onEnded { _ in onRelease() }
+            )
     }
 }
 
