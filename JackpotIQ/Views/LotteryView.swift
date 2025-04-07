@@ -5,7 +5,7 @@ enum Tab: Int {
     case analysis
     case generate
 }
-
+// 
 struct LotteryView: View {
     @StateObject private var viewModel: LotteryViewModel
     @State private var showingResults = false
@@ -13,6 +13,7 @@ struct LotteryView: View {
     @State private var selectedTab = 0
     
     init(type: LotteryType) {
+        print("DEBUG: Initializing LotteryView with type: \(type)")
         _viewModel = StateObject(wrappedValue: LotteryViewModel(type: type))
     }
     
@@ -30,9 +31,9 @@ struct LotteryView: View {
                 lotteryType: viewModel.type,
                 numberPercentages: viewModel.frequencyState.numberPercentages,
                 positionPercentages: Dictionary(
-                    viewModel.frequencyState.positionPercentages.map {
-                        ($0.position - 1, $0.percentages)
-                    },
+                    viewModel.frequencyState.positionPercentages
+                        .filter { $0.position < 6 } // Remove position 6 (special ball)
+                        .map { ($0.position, $0.percentages) },
                     uniquingKeysWith: { first, _ in first }
                 ),
                 specialBallPercentages: viewModel.frequencyState.specialBallPercentages
@@ -50,8 +51,26 @@ struct LotteryView: View {
                 }
                 .tag(Tab.generate)
         }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Image(viewModel.type == .megaMillions ? "MegaMillions" : "Powerball")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 32)
+                    .foregroundColor(viewModel.type == .megaMillions ? .green : .red)
+            }
+        }
         .task {
+            print("DEBUG: LotteryView task started")
             await viewModel.loadAllData()
+            print("DEBUG: LotteryView data loaded")
+        }
+        .onAppear {
+            print("DEBUG: LotteryView appeared")
+        }
+        .onDisappear {
+            print("DEBUG: LotteryView disappeared")
         }
     }
     

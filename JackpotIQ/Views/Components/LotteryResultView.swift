@@ -29,7 +29,8 @@ struct LotteryResultView: View {
                             colors: [.red, .pink],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
-                        )
+                        ),
+                    isSpecialBall: true
                 )
             }
             .padding(.top, 32)
@@ -67,34 +68,6 @@ struct LotteryResultView: View {
         }
         .padding()
         .navigationTitle("Results")
-    }
-}
-
-struct NumberBall: View {
-    let number: Int
-    let color: Color
-    var background: LinearGradient?
-    
-    init(number: Int, color: Color, background: LinearGradient? = nil) {
-        self.number = number
-        self.color = color
-        self.background = background
-    }
-    
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(background ?? LinearGradient(
-                    colors: [color],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
-            
-            Text("\(number)")
-                .font(.system(.title2, design: .rounded, weight: .bold))
-                .foregroundColor(.white)
-        }
-        .frame(width: 44, height: 44)
     }
 }
 

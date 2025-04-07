@@ -2,40 +2,34 @@ import SwiftUI
 
 struct GenerateNumbersView: View {
     @ObservedObject var viewModel: LotteryViewModel
+    @State private var showingFrequencyInfo = false
     @State private var animationId = UUID()
     @State private var showError = false
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                // Generated Numbers Display
-                if !viewModel.selectionState.selectedNumbers.isEmpty {
+            VStack(spacing: 16) {
+                if viewModel.selectionState.selectedNumbers.isEmpty {
+                    EmptyGenerationState()
+                        .transition(.opacity)
+                } else {
                     GeneratedCombinationCard(
                         viewModel: viewModel,
                         mainNumbers: Array(viewModel.selectionState.selectedNumbers),
                         specialBall: viewModel.selectionState.selectedSpecialBall ?? 0,
-                        frequency: viewModel.selectionState.frequency
+                        frequency: viewModel.selectionState.frequency,
+                        specialBallPercentages: Dictionary(
+                            viewModel.frequencyState.specialBallPercentages.map { ($0.number, $0.percentage) },
+                            uniquingKeysWith: { first, _ in first }
+                        ),
+                        showingFrequencyInfo: $showingFrequencyInfo
                     )
                     .transition(.move(edge: .top).combined(with: .opacity))
-                } else if !viewModel.isLoading {
-                    EmptyGenerationState()
-                        .transition(.opacity)
                 }
                 
-                // Generate Buttons
-                GenerationControls { isOptimized in
-                    Task {
-                        await viewModel.generateCombination(optimized: isOptimized)
-                        if isOptimized {
-                            // Set frequency to 0 for optimized combinations to show percentages
-                            viewModel.selectionState.frequency = 0
-                        }
-                        animationId = UUID()
-                    }
-                }
-                
-                // Disclaimer moved to bottom
                 LotteryDisclaimerText()
+                
+                GenerationControls(viewModel: viewModel)
             }
             .padding()
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: animationId)
@@ -68,42 +62,86 @@ private struct GeneratedCombinationCard: View {
     let mainNumbers: [Int]
     let specialBall: Int
     let frequency: Int?
-    
-    private var specialBallPercentages: [Int: Double] {
-        Dictionary(
-            viewModel.frequencyState.specialBallPercentages.map { ($0.number, $0.percentage) },
-            uniquingKeysWith: { first, _ in first }
-        )
-    }
+    let specialBallPercentages: [Int: Double]
+    @Binding var showingFrequencyInfo: Bool
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Your Numbers")
-                .font(.title2.bold())
+        VStack(alignment: .leading, spacing: 12) {
+            // Title and stats - without dropdown button
+            Text(viewModel.selectionState.optimizationMethod.title)
+                .font(.headline)
                 .foregroundColor(.primary)
             
+            // Numbers display - optimized by position
             HStack(spacing: 12) {
                 ForEach(mainNumbers.sorted(), id: \.self) { number in
-                    NumberBubble(number: number)
+                    NumberBall(number: number, color: .blue)
                 }
-                NumberBubble(number: specialBall, isSpecial: true)
+                
+                // Special ball with gradient
+                NumberBall(
+                    number: specialBall,
+                    color: .clear,
+                    background: viewModel.type == .megaMillions ?
+                        LinearGradient(
+                            colors: [.yellow, .orange],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ) :
+                        LinearGradient(
+                            colors: [.red, .pink],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                    isSpecialBall: true
+                )
             }
             .padding(.vertical, 8)
             
-            if frequency != nil {
+            // Display optimized by frequency combination if available
+            if !viewModel.frequencyState.optimizedByFrequency.isEmpty && !viewModel.frequencyState.optimizedByPosition.isEmpty {
                 Divider()
-                if !viewModel.frequencyState.positionPercentages.isEmpty {
-                    PositionAnalysisView(
-                        mainNumbers: mainNumbers,
-                        specialBall: specialBall,
-                        positionPercentages: viewModel.frequencyState.positionPercentages,
-                        specialBallPercentages: specialBallPercentages
-                    )
-                    Divider()
+                Text("Optimized by General Frequency")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .padding(.top, 4)
+                
+                // Display optimized by frequency numbers with consistent size
+                HStack(spacing: 12) {
+                    ForEach(viewModel.frequencyState.optimizedByFrequency.prefix(5), id: \.self) { number in
+                        NumberBall(number: number, color: .blue)
+                    }
+                    
+                    // Special ball with gradient
+                    if let specialBall = viewModel.frequencyState.optimizedByFrequency.last, viewModel.frequencyState.optimizedByFrequency.count > 5 {
+                        NumberBall(
+                            number: specialBall,
+                            color: .clear,
+                            background: viewModel.type == .megaMillions ?
+                                LinearGradient(
+                                    colors: [.yellow, .orange],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ) :
+                                LinearGradient(
+                                    colors: [.red, .pink],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                            isSpecialBall: true
+                        )
+                    }
                 }
+            }
+            
+            Divider()
+            
+            // Show appropriate generation note
+            // If we have optimized data (when optimized button was pressed), show the optimized note
+            if !viewModel.frequencyState.optimizedByFrequency.isEmpty || !viewModel.frequencyState.optimizedByPosition.isEmpty || frequency != nil {
                 OptimizedGenerationNote()
             } else {
-                Divider()
+                // Otherwise show the random note (when random button was pressed)
                 RandomGenerationNote()
             }
         }
@@ -116,50 +154,74 @@ private struct GeneratedCombinationCard: View {
     }
 }
 
-/// Displays position-based percentage analysis
-private struct PositionAnalysisView: View {
+/// Displays ball-based percentage analysis
+private struct BallAnalysisView: View {
     let mainNumbers: [Int]
     let specialBall: Int
     let positionPercentages: [PositionPercentages]
     let specialBallPercentages: [Int: Double]
+    @EnvironmentObject var viewModel: LotteryViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Position Analysis")
+            Text("Ball Analysis")
                 .font(.headline)
                 .padding(.bottom, 4)
+            
+            Text("Analysis method: \(viewModel.selectionState.optimizationMethod.title)")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .padding(.bottom, 8)
             
             ForEach(mainNumbers.sorted().indices, id: \.self) { index in
                 let number = mainNumbers.sorted()[index]
                 let position = index + 1
                 
-                if let positionData = positionPercentages.first(where: { $0.position == position }),
-                   let numberData = positionData.percentages.first(where: { $0.number == number }) {
-                    PositionPercentageRow(
-                        position: position,
-                        number: number,
-                        percentage: numberData.percentage
-                    )
+                if let positionData = positionPercentages.first(where: { $0.position == position }) {
+                    // Calculate total count for this position
+                    let totalCount = positionData.percentages.reduce(0) { $0 + $1.count }
+                    
+                    if let numberData = positionData.percentages.first(where: { $0.number == number }) {
+                        BallPercentageRow(
+                            position: position,
+                            number: number,
+                            count: numberData.count,
+                            totalCount: totalCount,
+                            percentage: numberData.percentage,
+                            method: viewModel.selectionState.optimizationMethod
+                        )
+                    }
                 }
             }
             
             if let specialBallPercentage = specialBallPercentages[specialBall] {
+                // Calculate total count for special balls
+                let totalSpecialCount = viewModel.frequencyState.specialBallPercentages.reduce(0) { $0 + $1.count }
+                let specialCount = viewModel.frequencyState.specialBallPercentages
+                    .first(where: { $0.number == specialBall })?.count ?? 0
+                
                 SpecialBallPercentageRow(
                     number: specialBall,
-                    percentage: specialBallPercentage
+                    count: specialCount,
+                    totalCount: totalSpecialCount,
+                    percentage: specialBallPercentage,
+                    lotteryType: viewModel.type
                 )
             }
         }
     }
 }
 
-private struct PositionPercentageRow: View {
+private struct BallPercentageRow: View {
     let position: Int
     let number: Int
+    let count: Int
+    let totalCount: Int
     let percentage: Double
+    let method: OptimizationDisplayMethod
     
     var body: some View {
-        Text("Position \(position): \(number) appears in \(Int(percentage * 100))% of winning combinations")
+        Text("Ball \(position): \(number) appeared \(count) times (\(String(format: "%.2f", percentage))%)")
             .foregroundColor(.secondary)
             .font(.subheadline)
     }
@@ -167,10 +229,13 @@ private struct PositionPercentageRow: View {
 
 private struct SpecialBallPercentageRow: View {
     let number: Int
+    let count: Int
+    let totalCount: Int
     let percentage: Double
+    let lotteryType: LotteryType
     
     var body: some View {
-        Text("Special Ball: \(number) appears in \(Int(percentage * 100))% of winning combinations")
+        Text("\(lotteryType == .megaMillions ? "Mega Ball" : "Powerball"): \(number) appeared \(count) times (\(String(format: "%.2f", percentage))%)")
             .foregroundColor(.secondary)
             .font(.subheadline)
             .padding(.top, 4)
@@ -180,7 +245,7 @@ private struct SpecialBallPercentageRow: View {
 /// Displays a disclaimer note for optimized number generation
 private struct OptimizedGenerationNote: View {
     var body: some View {
-        Text("Note: This is a unique combination optimized based on historical data. While it has never won before, past performance does not guarantee future results.")
+        Text("Note: These drawings are optimized using historical data but does not aim to predict or guarantee future success.")
             .font(.caption)
             .foregroundColor(.secondary)
             .padding(.top, 8)
@@ -242,16 +307,21 @@ private struct LotteryDisclaimerText: View {
 /// Control panel for generating lottery numbers
 /// - Note: Provides buttons for both optimized and random number generation
 private struct GenerationControls: View {
-    let onGenerate: (Bool) -> Void
+    @ObservedObject var viewModel: LotteryViewModel
+    @State private var optimizedGenerated = false
     
     var body: some View {
         VStack(spacing: 16) {
+            // Generate Optimized button (without dropdown)
             Button {
-                onGenerate(true)
+                Task {
+                    optimizedGenerated = true
+                    await viewModel.generateCombination(optimized: true)
+                }
             } label: {
                 HStack {
                     Image(systemName: "wand.and.stars")
-                    Text("Generate Optimized Numbers")
+                    Text("Generate Optimized")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -265,20 +335,29 @@ private struct GenerationControls: View {
                 .cornerRadius(12)
                 .shadow(color: .blue.opacity(0.3), radius: 5, x: 0, y: 2)
             }
+            .disabled(optimizedGenerated)
+            .opacity(optimizedGenerated ? 0.6 : 1.0)
             
             Button {
-                onGenerate(false)
+                Task {
+                    await viewModel.generateCombination(optimized: false)
+                }
             } label: {
                 HStack {
                     Image(systemName: "dice")
-                    Text("Generate Random Numbers")
+                    Text("Generate Random")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color(.systemGray5))
-                .foregroundColor(.primary)
+                .background(
+                    LinearGradient(colors: [.purple, .purple.opacity(0.8)],
+                                 startPoint: .top,
+                                 endPoint: .bottom)
+                )
+                .foregroundColor(.white)
                 .cornerRadius(12)
+                .shadow(color: .purple.opacity(0.3), radius: 5, x: 0, y: 2)
             }
         }
     }

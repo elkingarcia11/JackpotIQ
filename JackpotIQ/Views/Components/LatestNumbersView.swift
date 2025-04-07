@@ -87,11 +87,30 @@ struct LatestNumbersView: View {
             // Results Section
             ScrollView {
                 LazyVStack(spacing: 12) {
+                    // Title with simplified text
+                    Text("Latest Winning Numbers")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 8)
+                    
+                    // Use results with proper filtering
                     let results = viewModel.searchState.isSearching ?
                         viewModel.searchState.searchResults :
                         viewModel.filteredResults(for: selectedDate)
                     
-                    if viewModel.searchState.isSearching && results.isEmpty {
+                    if viewModel.isLoading {
+                        // Loading State
+                        VStack {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                                .padding()
+                            Text("Loading latest results...")
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 60)
+                    } else if viewModel.searchState.isSearching && results.isEmpty {
                         // Empty Search Results
                         VStack(spacing: 20) {
                             Image(systemName: "magnifyingglass")
@@ -112,9 +131,43 @@ struct LatestNumbersView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 60)
+                    } else if results.isEmpty {
+                        // Empty Latest Results 
+                        VStack(spacing: 20) {
+                            Image(systemName: "exclamationmark.circle")
+                                .font(.system(size: 48))
+                                .foregroundColor(.secondary)
+                            
+                            VStack(spacing: 8) {
+                                Text("No results available")
+                                    .font(.title3.weight(.medium))
+                                    .foregroundColor(.primary)
+                                
+                                Text("Unable to load the latest lottery results. Try refreshing or check your connection.")
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal)
+                            }
+                            
+                            Button {
+                                Task {
+                                    await viewModel.loadAllData()
+                                }
+                            } label: {
+                                Label("Refresh Data", systemImage: "arrow.clockwise")
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue.opacity(0.1))
+                                    .cornerRadius(8)
+                            }
+                            .padding(.top, 8)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 60)
                     } else {
                         // Results List
-                        ForEach(results, id: \.drawDate) { combination in
+                        ForEach(Array(results.enumerated()), id: \.offset) { index, combination in
                             CombinationRow(combination: combination, type: viewModel.type)
                         }
                         
@@ -142,7 +195,7 @@ struct LatestNumbersView: View {
                     DatePicker(
                         "Select Date",
                         selection: $selectedDate,
-                        in: viewModel.oldestResultDate...Date(),
+                        in: viewModel.oldestResultDate...Calendar.current.date(from: DateComponents(year: 2025, month: 12, day: 31))!,
                         displayedComponents: [.date]
                     )
                     .datePickerStyle(.graphical)
@@ -160,6 +213,11 @@ struct LatestNumbersView: View {
             }
             .presentationDetents([.medium])
         }
+        .task {
+            if viewModel.latestResults.isEmpty && viewModel.viewState != .loading {
+                await viewModel.loadAllData()
+            }
+        }
     }
 }
 
@@ -171,9 +229,9 @@ private struct CombinationRow: View {
         VStack(alignment: .leading, spacing: 12) {
             // Date and Prize Info
             HStack {
-                Text(combination.drawDate)
+                Text(formattedDate)
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.primary)
                 
                 if let prize = combination.prize {
                     Spacer()
@@ -186,7 +244,7 @@ private struct CombinationRow: View {
             // Numbers Display
             HStack(spacing: 8) {
                 // Main Numbers
-                ForEach(combination.mainNumbers, id: \.self) { number in
+                ForEach(combination.numbers, id: \.self) { number in
                     Text("\(number)")
                         .font(.system(.body, design: .rounded).weight(.semibold))
                         .frame(width: 40, height: 40)
@@ -223,7 +281,24 @@ private struct CombinationRow: View {
                 .fill(Color(.systemBackground))
                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+        )
         .padding(.horizontal)
+    }
+    
+    // Format date to be more user-friendly
+    private var formattedDate: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        guard let date = dateFormatter.date(from: combination.date) else {
+            return combination.date
+        }
+        
+        // Use a more user-friendly date format
+        dateFormatter.dateStyle = .medium
+        return dateFormatter.string(from: date)
     }
 }
 

@@ -10,8 +10,10 @@ struct JackpotIQApp: App {
 }
 
 struct ContentView: View {
+    @State private var selectedLottery: LotteryType?
+    
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 // App Logo
                 Image("Logo")
@@ -22,8 +24,8 @@ struct ContentView: View {
                 
                 // Lottery Options
                 VStack(spacing: 24) {
-                    NavigationLink {
-                        LotteryView(type: .megaMillions)
+                    Button {
+                        selectedLottery = .megaMillions
                     } label: {
                         LotteryButton(
                             image: "MegaMillions",
@@ -32,8 +34,8 @@ struct ContentView: View {
                         )
                     }
                     
-                    NavigationLink {
-                        LotteryView(type: .powerball)
+                    Button {
+                        selectedLottery = .powerball
                     } label: {
                         LotteryButton(
                             image: "Powerball",
@@ -46,6 +48,10 @@ struct ContentView: View {
                 
                 Spacer()
             }
+            .navigationDestination(item: $selectedLottery) { type in
+                LotteryView(type: type)
+                    .navigationTitle(type == .megaMillions ? "Mega Millions" : "Powerball")
+            }
         }
     }
 }
@@ -54,20 +60,17 @@ struct LotteryButton: View {
     let image: String
     let color: Color
     let accessibilityLabel: String
-    @State private var isPressed = false
     
     var body: some View {
         HStack {
             Image(image)
                 .resizable()
                 .scaledToFit()
-                .frame(height: 44)
+                .frame(height: 40)
                 .foregroundColor(color)
-                .padding(.horizontal, 4)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .padding(.horizontal, 20)
+        .padding()
         .background(
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
@@ -76,37 +79,18 @@ struct LotteryButton: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(
                         LinearGradient(
-                            colors: [
-                                color.opacity(0.15),
-                                color.opacity(0.05)
-                            ],
+                            colors: [color.opacity(0.1), color.opacity(0.05)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                 
                 RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(
-                        color.opacity(0.3),
-                        lineWidth: 1
-                    )
+                    .strokeBorder(color.opacity(0.2), lineWidth: 1)
             }
         )
-        .cornerRadius(12)
-        .shadow(
-            color: color.opacity(0.3),
-            radius: isPressed ? 2 : 5,
-            x: 0,
-            y: isPressed ? 1 : 2
-        )
-        .scaleEffect(isPressed ? 0.98 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+        .shadow(color: color.opacity(0.2), radius: 8, x: 0, y: 4)
         .accessibilityLabel(accessibilityLabel)
-        .pressEvents {
-            isPressed = true
-        } onRelease: {
-            isPressed = false
-        }
     }
 }
 

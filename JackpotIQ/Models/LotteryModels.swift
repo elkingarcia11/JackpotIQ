@@ -10,7 +10,7 @@ protocol LotteryGame {
 }
 
 // MARK: - Enums
-enum LotteryType: String {
+enum LotteryType: String, Hashable {
     case megaMillions = "mega-millions"
     case powerball = "powerball"
 }
@@ -50,6 +50,48 @@ extension LotteryType: LotteryGame {
 }
 
 // MARK: - API Response Models
+struct LotteryStatistics: Codable {
+    let type: String
+    let totalDraws: Int
+    let frequency: [String: Int]
+    let frequencyAtPosition: [String: [String: Int]]
+    let specialBallFrequency: [String: Int]
+    let optimizedByPosition: [Int]
+    let optimizedByGeneralFrequency: [Int]
+    
+    // Custom decoding to handle the numeric string keys and optional fields
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        type = try container.decode(String.self, forKey: .type)
+        totalDraws = try container.decode(Int.self, forKey: .totalDraws)
+        
+        // Decode dictionaries with string keys representing numbers
+        let rawFrequency = try container.decode([String: Int].self, forKey: .frequency)
+        frequency = rawFrequency
+        
+        let rawFrequencyAtPosition = try container.decode([String: [String: Int]].self, forKey: .frequencyAtPosition)
+        frequencyAtPosition = rawFrequencyAtPosition
+        
+        let rawSpecialBallFrequency = try container.decode([String: Int].self, forKey: .specialBallFrequency)
+        specialBallFrequency = rawSpecialBallFrequency
+        
+        // Safely decode arrays that might be missing in older API responses
+        optimizedByPosition = try container.decodeIfPresent([Int].self, forKey: .optimizedByPosition) ?? []
+        optimizedByGeneralFrequency = try container.decodeIfPresent([Int].self, forKey: .optimizedByGeneralFrequency) ?? []
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case type
+        case totalDraws
+        case frequency
+        case frequencyAtPosition
+        case specialBallFrequency
+        case optimizedByPosition
+        case optimizedByGeneralFrequency
+    }
+}
+
 struct NumberFrequency: Codable, Identifiable {
     let number: Int
     let count: Int
@@ -119,24 +161,25 @@ struct RandomCombination: Codable {
 }
 
 struct LatestCombination: Codable, Identifiable {
-    let drawDate: String
-    let mainNumbers: [Int]
+    let date: String
+    let numbers: [Int]
     let specialBall: Int
+    let type: String
     let prize: String?
     
-    var id: String { drawDate }
+    var id: String { date }
     
-    var date: Date {
+    // Use a static formatter for better performance and reliability
+    private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.date(from: drawDate) ?? Date()
-    }
+        formatter.locale = Locale(identifier: "en_US_POSIX") // Use POSIX locale for consistent parsing
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)      // Use UTC time zone
+        return formatter
+    }()
     
-    enum CodingKeys: String, CodingKey {
-        case drawDate = "draw_date"
-        case mainNumbers = "main_numbers"
-        case specialBall = "special_ball"
-        case prize
+    var formattedDate: Date {
+        Self.dateFormatter.date(from: date) ?? Date()
     }
 }
 
@@ -163,6 +206,12 @@ struct NumberPercentage: Identifiable, Equatable {
         self.number = frequency.number
         self.count = frequency.count
         self.percentage = frequency.percentage
+    }
+    
+    init(from positionFrequency: PositionFrequency) {
+        self.number = positionFrequency.number
+        self.count = positionFrequency.count
+        self.percentage = positionFrequency.percentage
     }
     
     static func == (lhs: NumberPercentage, rhs: NumberPercentage) -> Bool {

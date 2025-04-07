@@ -1,0 +1,60 @@
+# Xcode
+#
+## User settings
+xcuserdata/
+*.xcuserstate
+
+## Build generated
+build/
+DerivedData/
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Obj-C/Swift specific
+*.hmap
+*.ipa
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+Packages/
+.swiftpm/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+injected_container.swift
+
+# Environment variables
+.env
+.env.local
+
+# OS X
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# API Keys and Secrets
+ApiKeys.plist
+GoogleService-Info.plist
+APIConstants.swift
+
+# Logs
+*.log
+
+# Temporary files
+*.swp
+*~
+API.md

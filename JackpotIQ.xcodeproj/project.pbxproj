@@ -25,6 +25,8 @@
 		1E9DE1C92D98DF67003B43AA /* NumberGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1C82D98DF67003B43AA /* NumberGrid.swift */; };
 		1E9DE1CB2D98DF75003B43AA /* SearchNumbersSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1CA2D98DF75003B43AA /* SearchNumbersSheet.swift */; };
 		1E9DE1CE2D98DFBD003B43AA /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1CD2D98DFBD003B43AA /* NetworkService.swift */; };
+		1E9DE1D02DA0C98A003B43AA /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1CF2DA0C98A003B43AA /* AuthenticationManager.swift */; };
+		1E9DE1D22DA43A21003B43AA /* NumberBall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DE1D12DA43A21003B43AA /* NumberBall.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +68,8 @@
 		1E9DE1C82D98DF67003B43AA /* NumberGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberGrid.swift; sourceTree = "<group>"; };
 		1E9DE1CA2D98DF75003B43AA /* SearchNumbersSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchNumbersSheet.swift; sourceTree = "<group>"; };
 		1E9DE1CD2D98DFBD003B43AA /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
+		1E9DE1CF2DA0C98A003B43AA /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		1E9DE1D12DA43A21003B43AA /* NumberBall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberBall.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -196,6 +200,7 @@
 			isa = PBXGroup;
 			children = (
 				1E9DE1BC2D98DF01003B43AA /* NumberBubble.swift */,
+				1E9DE1D12DA43A21003B43AA /* NumberBall.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -203,6 +208,7 @@
 		1E9DE1CC2D98DFB1003B43AA /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				1E9DE1CF2DA0C98A003B43AA /* AuthenticationManager.swift */,
 				1E9DE1CD2D98DFBD003B43AA /* NetworkService.swift */,
 			);
 			path = Services;
@@ -348,6 +354,8 @@
 				1E9DE1C72D98DF54003B43AA /* LotteryResultView.swift in Sources */,
 				1E9DE1C32D98DF35003B43AA /* GenerateNumbersView.swift in Sources */,
 				1E9DE1C52D98DF46003B43AA /* LatestNumbersView.swift in Sources */,
+				1E9DE1D22DA43A21003B43AA /* NumberBall.swift in Sources */,
+				1E9DE1D02DA0C98A003B43AA /* AuthenticationManager.swift in Sources */,
 				1E9DE1882D98DE0D003B43AA /* JackpotIQApp.swift in Sources */,
 				1E9DE1CE2D98DFBD003B43AA /* NetworkService.swift in Sources */,
 				1E9DE1C92D98DF67003B43AA /* NumberGrid.swift in Sources */,

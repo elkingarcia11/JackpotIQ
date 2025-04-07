@@ -18,7 +18,7 @@ struct PercentageChart: View {
         self.title = title
         self.percentages = percentages
         self.isByPosition = isByPosition
-        self.sortedPercentages = percentages.sorted { $0.number < $1.number }
+        self.sortedPercentages = percentages.sorted { $0.percentage > $1.percentage }
         self.maxPercentage = percentages.map { $0.percentage }.max() ?? 0
     }
     
