@@ -33,9 +33,9 @@ struct FrequencyChartsView: View {
         VStack(spacing: 0) {
             // Tab Picker
             Picker("Chart Type", selection: $selectedTab) {
-                Text("General").tag(0)
-                Text(lotteryType.specialBallName).tag(1)
-                Text("By Ball").tag(2)
+                Text("By Frequency").tag(0)
+                Text("By Ball").tag(1)
+                Text(lotteryType.specialBallName).tag(2)
             }
             .pickerStyle(.segmented)
             .padding()
@@ -47,7 +47,7 @@ struct FrequencyChartsView: View {
                     ScrollView {
                         VStack {
                             PercentageChart(
-                                title: "General Number Frequencies",
+                                title: "Number Frequencies",
                                 percentages: numberPercentages.sorted(by: { $0.percentage > $1.percentage })
                             )
                             .padding()
@@ -57,22 +57,6 @@ struct FrequencyChartsView: View {
                     }
                 }
                 .tag(0)
-                
-                // Special Ball Frequencies
-                GeometryReader { geometry in
-                    ScrollView {
-                        VStack {
-                            PercentageChart(
-                                title: "\(lotteryType == .megaMillions ? "Mega Ball" : "Powerball") Frequencies",
-                                percentages: specialBallPercentages.sorted(by: { $0.percentage > $1.percentage })
-                            )
-                            .padding()
-                            Spacer(minLength: 0)
-                        }
-                        .frame(minHeight: geometry.size.height)
-                    }
-                }
-                .tag(1)
                 
                 // Ball Frequencies
                 ScrollView {
@@ -89,6 +73,22 @@ struct FrequencyChartsView: View {
                         }
                     }
                     .padding(.vertical)
+                }
+                .tag(1)
+                
+                // Special Ball Frequencies
+                GeometryReader { geometry in
+                    ScrollView {
+                        VStack {
+                            PercentageChart(
+                                title: "\(lotteryType == .megaMillions ? "Mega Ball" : "Powerball") Frequencies",
+                                percentages: specialBallPercentages.sorted(by: { $0.percentage > $1.percentage })
+                            )
+                            .padding()
+                            Spacer(minLength: 0)
+                        }
+                        .frame(minHeight: geometry.size.height)
+                    }
                 }
                 .tag(2)
             }

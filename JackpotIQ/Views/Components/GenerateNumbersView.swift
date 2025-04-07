@@ -340,6 +340,9 @@ private struct GenerationControls: View {
             
             Button {
                 Task {
+                    // Re-enable the optimized button when random is pressed
+                    optimizedGenerated = false
+                    
                     await viewModel.generateCombination(optimized: false)
                 }
             } label: {
