@@ -14,7 +14,7 @@ struct LatestNumbersView: View {
                     // Search Button
                     Button(action: { viewModel.searchState.showSearchSheet = true }) {
                         HStack {
-                            Label("Search Numbers", systemImage: "magnifyingglass")
+                            Label("Check for Match", systemImage: "magnifyingglass")
                                 .font(.body.weight(.medium))
                             Spacer()
                         }
@@ -56,6 +56,13 @@ struct LatestNumbersView: View {
                     }
                     .shadow(color: Color.blue.opacity(0.3), radius: 4, x: 0, y: 2)
                 }
+                
+                // Search note
+                Text("Searching for a specific combination can help you determine whether it's statistically worth playing, as no winning combination has ever repeated.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 4)
                 
                 // Search Active Indicator
                 if viewModel.searchState.isSearching {
@@ -226,63 +233,58 @@ private struct CombinationRow: View {
     let type: LotteryType
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Date and Prize Info
+        VStack(alignment: .leading, spacing: 10) {
+            // Date and Prize Info - Increased font size
             HStack {
                 Text(formattedDate)
-                    .font(.subheadline.weight(.medium))
+                    .font(.headline)
                     .foregroundColor(.primary)
                 
                 if let prize = combination.prize {
                     Spacer()
                     Text(prize)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.headline)
                         .foregroundColor(.green)
                 }
             }
             
-            // Numbers Display
-            HStack(spacing: 8) {
-                // Main Numbers
+            // Numbers Display - All balls together with more space between
+            HStack(spacing: 12) {
+                // Main Numbers - Using default size from NumberBall (44pt)
                 ForEach(combination.numbers, id: \.self) { number in
-                    Text("\(number)")
-                        .font(.system(.body, design: .rounded).weight(.semibold))
-                        .frame(width: 40, height: 40)
-                        .background(
-                            Circle()
-                                .fill(Color.blue.opacity(0.9))
-                                .shadow(color: .blue.opacity(0.3), radius: 2, x: 0, y: 2)
-                        )
-                        .foregroundColor(.white)
+                    NumberBall(number: number, color: .blue)
                 }
                 
-                Spacer()
-                
-                // Special Ball
-                Text("\(combination.specialBall)")
-                    .font(.system(.body, design: .rounded).weight(.semibold))
-                    .frame(width: 40, height: 40)
-                    .background(
-                        Circle()
-                            .fill(type == .megaMillions ?
-                                Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9) :
-                                Color.red.opacity(0.9))
-                            .shadow(color: (type == .megaMillions ?
-                                Color.yellow : Color.red).opacity(0.3),
-                                radius: 2, x: 0, y: 2)
-                    )
-                    .foregroundColor(type == .megaMillions ? .black : .white)
+                // Special Ball - Now next to regular balls
+                NumberBall(
+                    number: combination.specialBall,
+                    color: .clear,
+                    background: type == .megaMillions ?
+                        LinearGradient(
+                            colors: [Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9), Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ) :
+                        LinearGradient(
+                            colors: [Color.red.opacity(0.9), Color.red.opacity(0.9)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                    isSpecialBall: true
+                )
             }
+            .padding(.vertical, 8) // Match padding from Generate tab
+            .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding()
         .frame(maxWidth: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 2)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 16) // Matching cornerRadius of background
                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
         )
         .padding(.horizontal)

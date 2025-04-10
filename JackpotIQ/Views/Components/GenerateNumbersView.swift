@@ -27,9 +27,11 @@ struct GenerateNumbersView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
-                LotteryDisclaimerText()
-                
                 GenerationControls(viewModel: viewModel)
+                
+                // Gambling disclaimer moved to bottom as footer
+                LotteryDisclaimerText()
+                    .padding(.top, 16)
             }
             .padding()
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: animationId)
@@ -84,12 +86,12 @@ private struct GeneratedCombinationCard: View {
                     color: .clear,
                     background: viewModel.type == .megaMillions ?
                         LinearGradient(
-                            colors: [.yellow, .orange],
+                            colors: [Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9), Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ) :
                         LinearGradient(
-                            colors: [.red, .pink],
+                            colors: [Color.red.opacity(0.9), Color.red.opacity(0.9)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -119,12 +121,12 @@ private struct GeneratedCombinationCard: View {
                             color: .clear,
                             background: viewModel.type == .megaMillions ?
                                 LinearGradient(
-                                    colors: [.yellow, .orange],
+                                    colors: [Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9), Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ) :
                                 LinearGradient(
-                                    colors: [.red, .pink],
+                                    colors: [Color.red.opacity(0.9), Color.red.opacity(0.9)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
