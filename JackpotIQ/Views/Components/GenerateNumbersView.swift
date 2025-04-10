@@ -43,8 +43,8 @@ struct GenerateNumbersView: View {
             }
         }
         .animation(.easeInOut, value: viewModel.isLoading)
-        .onChange(of: viewModel.error) { error in
-            showError = error != nil
+        .onChange(of: viewModel.error) { oldValue, newValue in
+            showError = newValue != nil
         }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }

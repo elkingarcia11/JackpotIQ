@@ -14,7 +14,9 @@ actor AppAttestService {
     init(networkService: NetworkService) {
         self.networkService = networkService
         self.baseURL = URL(string: networkService.configuration.baseURL)!
-        setupAttestationService()
+        
+        // Call actor-isolated method properly using a Task
+        Task { await setupAttestationService() }
     }
     
     private func setupAttestationService() {

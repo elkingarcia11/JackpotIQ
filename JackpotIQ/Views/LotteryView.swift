@@ -33,7 +33,7 @@ struct LotteryView: View {
                     Label("Generate", systemImage: "wand.and.stars")
                 }
                 .tag(Tab.generate.rawValue)
-                .onChange(of: viewModel.viewState) { newState in
+                .onChange(of: viewModel.viewState) { oldState, newState in
                     // When viewModel loads after generating, make sure we stay on this tab
                     if case .loaded = newState, selectedTab == Tab.generate.rawValue {
                         // Force the tab to stay selected
@@ -154,8 +154,8 @@ struct LotteryView: View {
                 Text(error)
             }
         }
-        .onChange(of: viewModel.error) { error in
-            showingError = error != nil
+        .onChange(of: viewModel.error) { oldValue, newValue in
+            showingError = newValue != nil
         }
         .navigationDestination(isPresented: $showingResults) {
             if let specialBall = viewModel.selectionState.selectedSpecialBall {
