@@ -1,19 +1,20 @@
 import SwiftUI
+import OSLog
 
 enum Tab: Int {
     case latest
-    case analysis
     case generate
+    case analysis
 }
 // 
 struct LotteryView: View {
     @StateObject private var viewModel: LotteryViewModel
     @State private var showingResults = false
     @State private var showingError = false
-    @State private var selectedTab = 0
+    @State private var selectedTab = Tab.latest.rawValue // Initialize with the first tab
+    private let logger = Logger(subsystem: "com.jackpotiq.app", category: "LotteryView")
     
     init(type: LotteryType) {
-        print("DEBUG: Initializing LotteryView with type: \(type)")
         _viewModel = StateObject(wrappedValue: LotteryViewModel(type: type))
     }
     
@@ -24,7 +25,23 @@ struct LotteryView: View {
                 .tabItem {
                     Label("Latest", systemImage: "list.number")
                 }
-                .tag(Tab.latest)
+                .tag(Tab.latest.rawValue)
+            
+            // Generate Numbers Tab
+            GenerateNumbersView(viewModel: viewModel)
+                .tabItem {
+                    Label("Generate", systemImage: "wand.and.stars")
+                }
+                .tag(Tab.generate.rawValue)
+                .onChange(of: viewModel.viewState) { newState in
+                    // When viewModel loads after generating, make sure we stay on this tab
+                    if case .loaded = newState, selectedTab == Tab.generate.rawValue {
+                        // Force the tab to stay selected
+                        DispatchQueue.main.async {
+                            selectedTab = Tab.generate.rawValue
+                        }
+                    }
+                }
             
             // Frequency Analysis Tab
             FrequencyChartsView(
@@ -42,14 +59,7 @@ struct LotteryView: View {
             .tabItem {
                 Label("Analysis", systemImage: "chart.bar")
             }
-            .tag(Tab.analysis)
-            
-            // Generate Numbers Tab
-            GenerateNumbersView(viewModel: viewModel)
-                .tabItem {
-                    Label("Generate", systemImage: "wand.and.stars")
-                }
-                .tag(Tab.generate)
+            .tag(Tab.analysis.rawValue)
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -62,15 +72,15 @@ struct LotteryView: View {
             }
         }
         .task {
-            print("DEBUG: LotteryView task started")
+            logger.debug("LotteryView task started")
             await viewModel.loadAllData()
-            print("DEBUG: LotteryView data loaded")
+            logger.debug("LotteryView data loaded")
         }
         .onAppear {
-            print("DEBUG: LotteryView appeared")
+            logger.debug("LotteryView appeared")
         }
         .onDisappear {
-            print("DEBUG: LotteryView disappeared")
+            logger.debug("LotteryView disappeared")
         }
     }
     

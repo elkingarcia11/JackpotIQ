@@ -1,16 +1,38 @@
 import SwiftUI
+import Combine
 
 @main
 struct JackpotIQApp: App {
+    @State private var networkService = NetworkService(configuration: .developmentFallback)
+    @StateObject private var authService = AuthService(networkService: NetworkService(configuration: .developmentFallback))
+    
+    // App initialization logic
+    init() {
+        setupApp()
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(authService)
+                .task {
+                    do {
+                        try await authService.authenticate()
+                    } catch {
+                        // Authentication failed but app can continue with limited functionality
+                    }
+                }
         }
+    }
+    
+    private func setupApp() {
+        // Any additional setup logic that was previously in AppDelegate
     }
 }
 
 struct ContentView: View {
     @State private var selectedLottery: LotteryType?
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         NavigationStack {
@@ -60,6 +82,7 @@ struct LotteryButton: View {
     let image: String
     let color: Color
     let accessibilityLabel: String
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         HStack {
@@ -74,7 +97,7 @@ struct LotteryButton: View {
         .background(
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
+                    .fill(colorScheme == .dark ? Color(.black) : .white)
                 
                 RoundedRectangle(cornerRadius: 12)
                     .fill(

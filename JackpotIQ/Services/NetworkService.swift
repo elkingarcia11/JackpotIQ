@@ -1,29 +1,38 @@
 import Foundation
+import Combine
+import OSLog
 
-enum NetworkError: LocalizedError {
+enum NetworkError: Error, LocalizedError {
     case invalidURL
-    case invalidResponse(Int)
-    case decodingError(String)
-    case serverError(String)
-    case noData
-    case authenticationError(String)
+    case requestFailed(Error)
+    case invalidResponse
+    case decodingFailed(Error)
+    case serverError(status: Int, message: String?)
+    case unauthorizedError
     
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid URL"
-        case .invalidResponse(let statusCode):
-            return "Invalid response from server (Status: \(statusCode))"
-        case .decodingError(let message):
-            return "Failed to decode response: \(message)"
-        case .serverError(let message):
-            return "Server error: \(message)"
-        case .noData:
-            return "No data received from server"
-        case .authenticationError(let message):
-            return "Authentication error: \(message)"
+            return "The URL is invalid"
+        case .requestFailed(let error):
+            return "Request failed: \(error.localizedDescription)"
+        case .invalidResponse:
+            return "Invalid response from server"
+        case .decodingFailed(let error):
+            return "Failed to decode response: \(error.localizedDescription)"
+        case .serverError(let status, let message):
+            return "Server error (\(status)): \(message ?? "No details provided")"
+        case .unauthorizedError:
+            return "Unauthorized access"
         }
     }
+}
+
+enum HTTPMethod: String {
+    case get = "GET"
+    case post = "POST"
+    case put = "PUT"
+    case delete = "DELETE"
 }
 
 struct NetworkConfiguration {
@@ -31,12 +40,18 @@ struct NetworkConfiguration {
     let debug: Bool
     
     static let development = NetworkConfiguration(
-        baseURL: "http://localhost:3000/api",
+        baseURL: "https://jackpot-iq-api-669259029283.us-central1.run.app/api/",
+        debug: true
+    )
+    
+    // Alternative configuration for simulators that can't connect to host.docker.internal
+    static let developmentFallback = NetworkConfiguration(
+        baseURL: "https://jackpot-iq-api-669259029283.us-central1.run.app/api/",
         debug: true
     )
     
     static let production = NetworkConfiguration(
-        baseURL: "https://api.jackpotiq.com/api", // Replace with production URL
+        baseURL: "https://api.jackpotiq.com/api/", // Replace with production URL
         debug: false
     )
 }
@@ -61,9 +76,16 @@ struct TokenResponse: Codable {
 }
 
 // Add enum for optimization method
-enum OptimizationMethod {
-    case byPosition
-    case byGeneralFrequency
+enum OptimizationMethod: String, Codable {
+    case byPosition = "position"
+    case byGeneralFrequency = "frequency"
+}
+
+// Add this struct near the other request models at the top of the file
+struct LotterySearchRequest: Codable {
+    let type: String
+    let numbers: [Int]?
+    let specialBall: Int?
 }
 
 protocol NetworkServiceProtocol {
@@ -83,73 +105,156 @@ protocol NetworkServiceProtocol {
     func searchLotteryDraws(type: LotteryType, numbers: [Int], specialBall: Int?) async throws -> [LatestCombination]
 }
 
+@Observable
 class NetworkService: NetworkServiceProtocol {
     static let shared = NetworkService()
-    private let configuration: NetworkConfiguration
+    private let baseURL: URL
     private var authToken: String?
+    let configuration: NetworkConfiguration
+    private let logger = Logger(subsystem: "com.jackpotiq.app", category: "NetworkService")
+    private let session: URLSession
     
     // For testing purposes - set to false to bypass authentication
     private let requireAuthentication = false
     
-    init(configuration: NetworkConfiguration = .development) {
+    init(configuration: NetworkConfiguration = .developmentFallback) {
         self.configuration = configuration
+        
+        guard let url = URL(string: configuration.baseURL) else {
+            fatalError("Invalid base URL: \(configuration.baseURL)")
+        }
+        self.baseURL = url
+        
+        // Print the base URL for debugging
+        print("DEBUG: Base URL initialized as: \(self.baseURL.absoluteString)")
+        
+        // Create a custom session configuration that allows insecure loads for development
+        let sessionConfig = URLSessionConfiguration.default
+        if configuration.debug {
+            // This is for development only - allows connection to localhost, etc.
+            sessionConfig.timeoutIntervalForRequest = 60 // Increase timeout to 60 seconds
+            sessionConfig.timeoutIntervalForResource = 60 // Increase timeout to 60 seconds
+            // Disable ATS for development only
+            sessionConfig.waitsForConnectivity = true
+            // Allow insecure HTTP loads for development
+            sessionConfig.allowsExpensiveNetworkAccess = true
+            sessionConfig.allowsConstrainedNetworkAccess = true
+            
+            #if DEBUG
+            // This is needed because we're setting ATS exceptions in Info.plist instead
+            // but the environment might not pick it up correctly
+            if let dict = Bundle.main.object(forInfoDictionaryKey: "NSAppTransportSecurity") as? [String: Any] {
+                sessionConfig.connectionProxyDictionary = ["NSAppTransportSecurity": dict]
+            }
+            #endif
+            
+            logger.debug("Using development session configuration with ATS exceptions")
+        }
+        self.session = URLSession(configuration: sessionConfig)
+        
         // Load token from secure storage if available
-        self.authToken = UserDefaults.standard.string(forKey: "authToken")
+        if let token = UserDefaults.standard.string(forKey: "authToken") {
+            self.authToken = token
+            logger.debug("Loaded auth token from UserDefaults")
+        }
     }
     
-    private func performRequest<T: Decodable>(endpoint: String, method: String = "GET", body: [String: Any]? = nil, requiresAuth: Bool = true) async throws -> T {
-        guard let url = URL(string: "\(configuration.baseURL)/\(endpoint)") else {
+    // Set authentication token for authorized requests
+    func setAuthToken(_ token: String) {
+        self.authToken = token
+        UserDefaults.standard.set(token, forKey: "authToken")
+        logger.debug("Auth token set and saved to UserDefaults")
+    }
+    
+    // Clear authentication token
+    func clearAuthToken() {
+        self.authToken = nil
+        UserDefaults.standard.removeObject(forKey: "authToken")
+        logger.debug("Auth token cleared from memory and UserDefaults")
+    }
+    
+    func performRequest<T: Decodable>(endpoint: String, method: HTTPMethod = .get, body: Encodable? = nil) async throws -> T {
+        guard let url = URL(string: endpoint, relativeTo: self.baseURL) else {
+            logger.error("Invalid URL: \(endpoint) relative to \(self.baseURL)")
             throw NetworkError.invalidURL
         }
         
+        // Debug the URL construction to ensure it's correct
+        print("DEBUG: Constructed URL: \(url.absoluteString)")
+        print("DEBUG: Base URL: \(self.baseURL.absoluteString)")
+        print("DEBUG: Endpoint: \(endpoint)")
+        
         var request = URLRequest(url: url)
-        request.httpMethod = method
+        request.httpMethod = method.rawValue
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Add auth token if available
+        if let token = authToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         
         if let body = body {
-            request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            let encoder = JSONEncoder()
+            request.httpBody = try encoder.encode(body)
         }
         
-        // Add authorization header if required (but skip during testing)
-        if requiresAuth && requireAuthentication, let token = authToken {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        
-        if configuration.debug {
-            print("📡 API Request: \(method) \(url)")
-            if let body = body {
-                print("📦 Body: \(body)")
-            }
-        }
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.invalidResponse(-1)
-        }
-        
-        if configuration.debug {
-            print("📡 API Response: \(httpResponse.statusCode)")
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("📦 Data: \(responseString)")
-            }
-        }
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if httpResponse.statusCode == 401 {
-                throw NetworkError.authenticationError("Authentication required")
-            }
-             
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw NetworkError.serverError(errorResponse.message ?? "Unknown error")
-            }
-            throw NetworkError.invalidResponse(httpResponse.statusCode)
+        // Enhanced request logging
+        let isAppAttestChallengeEndpoint = endpoint == "auth/app-attest-challenge"
+        if configuration.debug || isAppAttestChallengeEndpoint {
+            let logPrefix = isAppAttestChallengeEndpoint ? "APP-ATTEST-CHALLENGE REQUEST:" : "REQUEST:"
+            // Only log the URL and method, not headers or body
+            logger.debug("\(logPrefix) \(method.rawValue) \(url.absoluteString)")
+            
+            // Remove prints that could expose sensitive information
+            logger.debug("Request to \(url.absoluteString) with method \(method.rawValue)")
         }
         
         do {
-            return try JSONDecoder().decode(T.self, from: data)
+            if configuration.debug {
+                logger.debug("Attempting connection to \(url.absoluteString)...")
+            }
+            
+            // Use our custom session instead of the shared one
+            let (data, response) = try await session.data(for: request)
+            
+            // Enhanced response logging
+            if configuration.debug || isAppAttestChallengeEndpoint {
+                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+                let logPrefix = isAppAttestChallengeEndpoint ? "APP-ATTEST-CHALLENGE RESPONSE:" : "RESPONSE:"
+                // Only log status code, not response body
+                logger.debug("\(logPrefix) Status: \(statusCode)")
+                
+                logger.debug("Connection successful! Response status: \(statusCode)")
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                logger.error("Invalid response type")
+                throw NetworkError.invalidResponse
+            }
+            
+            // Handle HTTP status codes
+            switch httpResponse.statusCode {
+            case 200...299: // Success
+                do {
+                    let decoder = JSONDecoder()
+                    return try decoder.decode(T.self, from: data)
+                } catch {
+                    logger.error("Decoding failed: \(error.localizedDescription)")
+                    throw NetworkError.decodingFailed(error)
+                }
+            case 401: // Unauthorized
+                logger.error("Unauthorized access")
+                throw NetworkError.unauthorizedError
+            default:
+                let errorMessage = String(data: data, encoding: .utf8)
+                logger.error("Server error (\(httpResponse.statusCode)): \(errorMessage ?? "No message")")
+                throw NetworkError.serverError(status: httpResponse.statusCode, message: errorMessage)
+            }
+        } catch let error as NetworkError {
+            throw error
         } catch {
-            throw NetworkError.decodingError(error.localizedDescription)
+            logger.error("Network request failed: \(error.localizedDescription)")
+            throw NetworkError.requestFailed(error)
         }
     }
     
@@ -158,18 +263,16 @@ class NetworkService: NetworkServiceProtocol {
     func verifyAppAttest(attestation: String, challenge: String) async throws -> AppAttestResponse {
         return try await performRequest(
             endpoint: "auth/verify-app-attest",
-            method: "POST",
-            body: ["attestation": attestation, "challenge": challenge],
-            requiresAuth: false
+            method: .post,
+            body: AppAttestRequest(attestation: attestation, challenge: challenge)
         )
     }
     
     func generateToken(deviceId: String) async throws -> TokenResponse {
         let response: TokenResponse = try await performRequest(
             endpoint: "auth/token",
-            method: "POST",
-            body: ["deviceId": deviceId],
-            requiresAuth: false
+            method: .post,
+            body: TokenRequest(deviceId: deviceId)
         )
         
         // Save token for future requests
@@ -264,7 +367,8 @@ class NetworkService: NetworkServiceProtocol {
         let specialBall = optimizedNumbers.last!
         
         if configuration.debug {
-            print("DEBUG: Generated optimized combination using \(method) method: \(mainNumbers), \(specialBall)")
+            // Remove specific combination info
+            logger.debug("Generated optimized combination")
         }
         
         return OptimizedCombination(
@@ -290,7 +394,8 @@ class NetworkService: NetworkServiceProtocol {
         let result: RandomNumberResponse = try await performRequest(endpoint: endpoint)
         
         if configuration.debug {
-            print("DEBUG: Generated random combination: \(result.numbers), \(result.specialBall)")
+            // Remove specific combination info
+            logger.debug("Generated random combination")
         }
         
         return RandomCombination(
@@ -307,7 +412,8 @@ class NetworkService: NetworkServiceProtocol {
         )
         
         if configuration.debug {
-            print("📊 Received \(latestDraws.count) latest combinations")
+            // Log only count, not actual combinations
+            logger.debug("Received \(latestDraws.count) latest combinations")
         }
         
         // Create a LatestCombinationsResponse from the array
@@ -319,39 +425,28 @@ class NetworkService: NetworkServiceProtocol {
     }
     
     func searchLotteryDraws(type: LotteryType, numbers: [Int], specialBall: Int?) async throws -> [LatestCombination] {
-        // Create request body matching expected format:
-        // {
-        //   "type": "mega-millions",  // Required: "mega-millions" or "powerball"
-        //   "numbers": [1, 2, 3],     // Optional: array of numbers to search for
-        //   "specialBall": 10         // Optional: special ball number
-        // }
-        var body: [String: Any] = [
-            "type": type.rawValue
-        ]
-        
-        // Only include numbers if there are some to search for
-        if !numbers.isEmpty {
-            body["numbers"] = numbers
-        }
-        
-        // Only include specialBall if provided
-        if let specialBall = specialBall {
-            body["specialBall"] = specialBall
-        }
+        // Create a proper Encodable struct instead of a dictionary
+        let searchRequest = LotterySearchRequest(
+            type: type.rawValue,
+            numbers: numbers.isEmpty ? nil : numbers,
+            specialBall: specialBall
+        )
         
         if configuration.debug {
-            print("🔍 Searching for lottery draws with params: \(body)")
+            // Log without specifics
+            logger.debug("Searching for lottery draws")
         }
         
         // Response will be an array of LatestCombination objects
         let results: [LatestCombination] = try await performRequest(
             endpoint: "lottery/search",
-            method: "POST",
-            body: body
+            method: .post,
+            body: searchRequest
         )
         
         if configuration.debug {
-            print("🔍 Found \(results.count) matching lottery draws")
+            // Log only count, not actual results
+            logger.debug("Found \(results.count) matching lottery draws")
         }
         
         return results

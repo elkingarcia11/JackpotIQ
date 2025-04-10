@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import OSLog
 
 // Move enum outside the class
 enum OptimizationDisplayMethod {
@@ -55,6 +56,7 @@ class LotteryViewModel: ObservableObject {
         var totalDraws: Int = 0
         var optimizedByPosition: [Int] = []
         var optimizedByFrequency: [Int] = []
+        var lastRefreshed: Date?
     }
     
     struct SearchState {
@@ -91,6 +93,7 @@ class LotteryViewModel: ObservableObject {
     // MARK: - Properties
     let type: LotteryType
     private let networkService: NetworkServiceProtocol
+    private let logger = Logger(subsystem: "com.jackpotiq.app", category: "LotteryViewModel")
     
     @Published private(set) var viewState: ViewState = .idle
     @Published private(set) var frequencyState = FrequencyState()
@@ -134,8 +137,15 @@ class LotteryViewModel: ObservableObject {
             hasMoreResults = latestResponse.hasMore
             currentPage = 1
             
-            // Proceed to loading frequencies for other tabs (catch separately)
-            await loadFrequencyData()
+            // Check if we need to reload frequency data
+            let shouldRefreshFrequencyData = needsFrequencyRefresh()
+            
+            if shouldRefreshFrequencyData {
+                await loadFrequencyData()
+            } else if frequencyState.lastRefreshed == nil {
+                // If we've never loaded frequency data, load it
+                await loadFrequencyData()
+            }
             
             // Even if frequencies fail, we've loaded the latest tab data
             if viewState == .loading {
@@ -144,6 +154,38 @@ class LotteryViewModel: ObservableObject {
         } catch {
             viewState = .error("Failed to load latest drawings: \(error.localizedDescription)")
         }
+    }
+    
+    // Helper method to determine if frequency data needs a refresh
+    private func needsFrequencyRefresh() -> Bool {
+        guard let lastRefreshed = frequencyState.lastRefreshed else {
+            // Never refreshed before, so yes
+            return true
+        }
+        
+        // Get current date/time
+        let now = Date()
+        let calendar = Calendar.current
+        
+        // Create 12:10 AM threshold for today
+        var refreshThresholdComponents = calendar.dateComponents([.year, .month, .day], from: now)
+        refreshThresholdComponents.hour = 0
+        refreshThresholdComponents.minute = 10
+        refreshThresholdComponents.second = 0
+        
+        guard let refreshThreshold = calendar.date(from: refreshThresholdComponents) else {
+            // If we can't create the time, default to refreshing
+            return true
+        }
+        
+        // Check if lastRefreshed is before 12:10 AM today and now is after 12:10 AM
+        let lastRefreshDay = calendar.startOfDay(for: lastRefreshed)
+        let nowDay = calendar.startOfDay(for: now)
+        
+        // Different days and now is past threshold time, or
+        // Same day but lastRefreshed is before threshold and now is after threshold
+        return (lastRefreshDay != nowDay && now >= refreshThreshold) ||
+               (lastRefreshDay == nowDay && lastRefreshed < refreshThreshold && now >= refreshThreshold)
     }
     
     // New method to load frequency data separately
@@ -187,10 +229,13 @@ class LotteryViewModel: ObservableObject {
                 )
             }.sorted { $0.position < $1.position }
             
+            // Record the time we refreshed
+            frequencyState.lastRefreshed = Date()
+            
             viewState = .loaded
         } catch {
             // Don't set viewState to error, as we want to show latest results even if frequencies fail
-            print("Error loading frequency data: \(error.localizedDescription)")
+            logger.error("Error loading frequency data: \(error.localizedDescription)")
         }
     }
     
@@ -278,14 +323,18 @@ class LotteryViewModel: ObservableObject {
                 mainNumbers = response.mainNumbers
                 specialBall = response.specialBall
                 
-                // Clear position percentages and optimized arrays for random combinations
-                frequencyState.positionPercentages = []
-                frequencyState.optimizedByFrequency = []
-                frequencyState.optimizedByPosition = []
+                // For random numbers, we keep the position percentages for the Analysis tab
+                // but clear the optimized arrays for display purposes
+                selectionState.optimizationMethod = .byPosition // Reset this to default
                 
                 // Set the selection state to the random results
                 selectionState.selectedNumbers = Set(mainNumbers)
                 selectionState.selectedSpecialBall = specialBall
+                
+                // Clear these for UI purposes only - this indicates a random generation
+                // but doesn't affect the analysis tab data
+                frequencyState.optimizedByFrequency = []
+                frequencyState.optimizedByPosition = []
             }
             
             viewState = .loaded
@@ -294,54 +343,17 @@ class LotteryViewModel: ObservableObject {
         }
     }
     
-    /// Prints debug statistics for optimized ball positions to the console
+    /// Logs debug statistics for optimized ball positions without exposing sensitive data
     private func debugPrintBallStatistics(mainNumbers: [Int], specialBall: Int) {
-        print("\n=== OPTIMIZED COMBINATION DEBUG INFO ===")
-        print("Lottery Type: \(type.rawValue)")
-        print("Generated Numbers: \(mainNumbers.sorted()), Special Ball: \(specialBall)")
+        // Replace with logger that doesn't expose the actual numbers
+        logger.debug("Generated optimized combination for \(self.type.rawValue)")
         
-        // First, print the positions and their data
-        print("\n--- POSITION DATA IN MODEL ---")
-        for positionData in frequencyState.positionPercentages.sorted(by: { $0.position < $1.position }) {
-            print("Position \(positionData.position) data (stored with 1-based index):")
-            print("  Total numbers at this position: \(positionData.percentages.count)")
-            print("  Sample numbers: \(positionData.percentages.prefix(5).map { "\($0.number): \($0.count) times" }.joined(separator: ", "))")
+        // Only log general statistics, not specific numbers
+        for positionData in self.frequencyState.positionPercentages.sorted(by: { $0.position < $1.position }) {
+            logger.debug("Position \(positionData.position) data - total numbers: \(positionData.percentages.count)")
         }
         
-        // Now print the optimized numbers and their position data
-        print("\n--- OPTIMIZED NUMBERS ANALYSIS ---")
-        for (index, number) in mainNumbers.sorted().enumerated() {
-            // For display, we show Ball 1-5, but internally these are indices 0-4
-            let displayPosition = index + 1  // What we show to the user (Ball 1, Ball 2...)
-            let internalPosition = index     // Actual array index (0, 1, 2...)
-            let modelPosition = internalPosition + 1  // Position stored in the model (1, 2, 3...)
-            
-            print("Ball \(displayPosition) (array index \(internalPosition), model position \(modelPosition)):")
-            
-            // Need to match the position in positionPercentages with our model position (1-based)
-            if let positionData = frequencyState.positionPercentages.first(where: { $0.position == modelPosition }) {
-                let totalCount = positionData.percentages.reduce(0) { $0 + $1.count }
-                
-                if let numberData = positionData.percentages.first(where: { $0.number == number }) {
-                    print("  Number \(number) appeared \(numberData.count)/\(totalCount) times (\(String(format: "%.2f", numberData.percentage))%)")
-                } else {
-                    print("  Number \(number) has no frequency data")
-                }
-            } else {
-                print("  No position data available")
-            }
-        }
-        
-        // Print special ball stats
-        print("\n--- SPECIAL BALL ANALYSIS ---")
-        let totalSpecialCount = frequencyState.specialBallPercentages.reduce(0) { $0 + $1.count }
-        if let specialData = frequencyState.specialBallPercentages.first(where: { $0.number == specialBall }) {
-            print("\(type == .megaMillions ? "Mega Ball" : "Powerball"): \(specialBall) appeared \(specialData.count)/\(totalSpecialCount) times (\(String(format: "%.2f", specialData.percentage))%)")
-        } else {
-            print("\(type == .megaMillions ? "Mega Ball" : "Powerball"): \(specialBall) has no frequency data")
-        }
-        
-        print("=====================================\n")
+        logger.debug("Ball selection statistics logged")
     }
     
     func toggleNumber(_ number: Int) {
@@ -414,14 +426,9 @@ class LotteryViewModel: ObservableObject {
         // Get the selected date in string format
         let selectedDateString = dateFormatter.string(from: date)
         
-        // Print detailed debugging information
-        print("DEBUG: Selected date: \(date) -> formatted as string: \(selectedDateString)")
-        print("DEBUG: Available results: \(latestResults.count)")
-        
-        // Show the first few combinations for debugging
-        for (index, combination) in latestResults.prefix(5).enumerated() {
-            print("DEBUG: Result \(index): date string: \(combination.date)")
-        }
+        // Log without exposing data
+        logger.debug("Filtering results for date: \(selectedDateString)")
+        logger.debug("Available results count: \(self.latestResults.count)")
         
         // Filter based on string comparison - only include dates less than or equal to the selected date
         let filteredResults = latestResults.filter { combination in
@@ -429,12 +436,7 @@ class LotteryViewModel: ObservableObject {
             return combination.date <= selectedDateString
         }
         
-        print("DEBUG: Filtered down to \(filteredResults.count) results")
-        
-        // Print the first few filtered combinations to verify
-        for (index, combination) in filteredResults.prefix(5).enumerated() {
-            print("DEBUG: Filtered \(index): date string: \(combination.date)")
-        }
+        logger.debug("Filtered down to \(filteredResults.count) results")
         
         return filteredResults
     }
@@ -514,7 +516,7 @@ class LotteryViewModel: ObservableObject {
             
             frequencyState.positionPercentages = positionPercentagesResult
         } catch {
-            print("Error calculating position percentages: \(error.localizedDescription)")
+            logger.error("Error calculating position percentages: \(error.localizedDescription)")
         }
     }
     
