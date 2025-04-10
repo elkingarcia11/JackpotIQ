@@ -72,15 +72,15 @@ struct LotteryView: View {
             }
         }
         .task {
-            logger.debug("LotteryView task started")
+            logger.debug("Loading lottery data")
             await viewModel.loadAllData()
-            logger.debug("LotteryView data loaded")
+            logger.debug("Lottery data loaded")
         }
         .onAppear {
-            logger.debug("LotteryView appeared")
+            logger.debug("View appeared")
         }
         .onDisappear {
-            logger.debug("LotteryView disappeared")
+            logger.debug("View disappeared")
         }
     }
     

@@ -307,8 +307,8 @@ class LotteryViewModel: ObservableObject {
                 // Calculate position percentages based on frequencies
                 await calculatePositionPercentages(for: mainNumbers, method: .byPosition)
                 
-                // Print debug information to console
-                debugPrintBallStatistics(mainNumbers: mainNumbers, specialBall: specialBall)
+                // Generic logging without number details
+                logger.debug("Generated optimized combination")
                 
                 // Now calculate the optimized by frequency numbers for display
                 let frequencyMethod = OptimizationMethod.byGeneralFrequency
@@ -335,6 +335,9 @@ class LotteryViewModel: ObservableObject {
                 // but doesn't affect the analysis tab data
                 frequencyState.optimizedByFrequency = []
                 frequencyState.optimizedByPosition = []
+                
+                // Simple log without details
+                logger.debug("Generated random combination")
             }
             
             viewState = .loaded
@@ -343,17 +346,10 @@ class LotteryViewModel: ObservableObject {
         }
     }
     
-    /// Logs debug statistics for optimized ball positions without exposing sensitive data
+    /// Logs basic information without exposing generated numbers
     private func debugPrintBallStatistics(mainNumbers: [Int], specialBall: Int) {
-        // Replace with logger that doesn't expose the actual numbers
-        logger.debug("Generated optimized combination for \(self.type.rawValue)")
-        
-        // Only log general statistics, not specific numbers
-        for positionData in self.frequencyState.positionPercentages.sorted(by: { $0.position < $1.position }) {
-            logger.debug("Position \(positionData.position) data - total numbers: \(positionData.percentages.count)")
-        }
-        
-        logger.debug("Ball selection statistics logged")
+        // Just log a basic message with no sensitive data
+        logger.debug("Generated combination statistics processed")
     }
     
     func toggleNumber(_ number: Int) {
@@ -426,9 +422,8 @@ class LotteryViewModel: ObservableObject {
         // Get the selected date in string format
         let selectedDateString = dateFormatter.string(from: date)
         
-        // Log without exposing data
-        logger.debug("Filtering results for date: \(selectedDateString)")
-        logger.debug("Available results count: \(self.latestResults.count)")
+        // Basic logging without specifics
+        logger.debug("Filtering results by date")
         
         // Filter based on string comparison - only include dates less than or equal to the selected date
         let filteredResults = latestResults.filter { combination in
@@ -436,7 +431,8 @@ class LotteryViewModel: ObservableObject {
             return combination.date <= selectedDateString
         }
         
-        logger.debug("Filtered down to \(filteredResults.count) results")
+        // Just log the count
+        logger.debug("Found \(filteredResults.count) filtered results")
         
         return filteredResults
     }

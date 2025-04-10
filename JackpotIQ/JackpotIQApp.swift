@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import OSLog
 
 @main
 struct JackpotIQApp: App {
@@ -7,6 +8,7 @@ struct JackpotIQApp: App {
     @StateObject private var authService = AuthService(networkService: NetworkService(configuration: .developmentFallback))
     @State private var isShowingSplash = true
     @State private var startFadeContent = false
+    private let logger = Logger(subsystem: "com.jackpotiq.app", category: "AppDelegate")
     
     // App initialization logic
     init() {
@@ -21,9 +23,9 @@ struct JackpotIQApp: App {
                     .task {
                         do {
                             try await authService.authenticate()
-                            // Remove sensitive print
+                            logger.debug("Authentication completed")
                         } catch {
-                            // Remove print with error details
+                            logger.error("Authentication failed")
                             // Authentication failed but app can continue with limited functionality
                         }
                     }
@@ -55,6 +57,7 @@ struct JackpotIQApp: App {
                 Task {
                     // Use this time to preload any essential data
                     // This runs in parallel with the splash screen animation
+                    logger.debug("App launched")
                 }
             }
         }

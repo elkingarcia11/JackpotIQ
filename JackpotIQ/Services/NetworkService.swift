@@ -174,15 +174,10 @@ class NetworkService: NetworkServiceProtocol {
     }
     
     func performRequest<T: Decodable>(endpoint: String, method: HTTPMethod = .get, body: Encodable? = nil) async throws -> T {
+        // Create URL and request
         guard let url = URL(string: endpoint, relativeTo: self.baseURL) else {
-            logger.error("Invalid URL: \(endpoint) relative to \(self.baseURL)")
             throw NetworkError.invalidURL
         }
-        
-        // Debug the URL construction to ensure it's correct
-        print("DEBUG: Constructed URL: \(url.absoluteString)")
-        print("DEBUG: Base URL: \(self.baseURL.absoluteString)")
-        print("DEBUG: Endpoint: \(endpoint)")
         
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
@@ -193,25 +188,21 @@ class NetworkService: NetworkServiceProtocol {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         
+        // Add body if provided
         if let body = body {
-            let encoder = JSONEncoder()
-            request.httpBody = try encoder.encode(body)
+            request.httpBody = try JSONEncoder().encode(body)
         }
         
         // Enhanced request logging
         let isAppAttestChallengeEndpoint = endpoint == "auth/app-attest-challenge"
         if configuration.debug || isAppAttestChallengeEndpoint {
-            let logPrefix = isAppAttestChallengeEndpoint ? "APP-ATTEST-CHALLENGE REQUEST:" : "REQUEST:"
-            // Only log the URL and method, not headers or body
-            logger.debug("\(logPrefix) \(method.rawValue) \(url.absoluteString)")
-            
-            // Remove prints that could expose sensitive information
-            logger.debug("Request to \(url.absoluteString) with method \(method.rawValue)")
+            // Only log that a request was made, no details
+            logger.debug("Making API request")
         }
         
         do {
             if configuration.debug {
-                logger.debug("Attempting connection to \(url.absoluteString)...")
+                logger.debug("Attempting connection")
             }
             
             // Use our custom session instead of the shared one
@@ -220,11 +211,8 @@ class NetworkService: NetworkServiceProtocol {
             // Enhanced response logging
             if configuration.debug || isAppAttestChallengeEndpoint {
                 let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-                let logPrefix = isAppAttestChallengeEndpoint ? "APP-ATTEST-CHALLENGE RESPONSE:" : "RESPONSE:"
                 // Only log status code, not response body
-                logger.debug("\(logPrefix) Status: \(statusCode)")
-                
-                logger.debug("Connection successful! Response status: \(statusCode)")
+                logger.debug("Response received: \(statusCode)")
             }
             
             guard let httpResponse = response as? HTTPURLResponse else {
@@ -239,21 +227,21 @@ class NetworkService: NetworkServiceProtocol {
                     let decoder = JSONDecoder()
                     return try decoder.decode(T.self, from: data)
                 } catch {
-                    logger.error("Decoding failed: \(error.localizedDescription)")
+                    logger.error("Decoding failed")
                     throw NetworkError.decodingFailed(error)
                 }
             case 401: // Unauthorized
                 logger.error("Unauthorized access")
                 throw NetworkError.unauthorizedError
             default:
-                let errorMessage = String(data: data, encoding: .utf8)
-                logger.error("Server error (\(httpResponse.statusCode)): \(errorMessage ?? "No message")")
-                throw NetworkError.serverError(status: httpResponse.statusCode, message: errorMessage)
+                // Don't log raw error messages which might contain sensitive info
+                logger.error("Server error (\(httpResponse.statusCode))")
+                throw NetworkError.serverError(status: httpResponse.statusCode, message: nil)
             }
         } catch let error as NetworkError {
             throw error
         } catch {
-            logger.error("Network request failed: \(error.localizedDescription)")
+            logger.error("Network request failed")
             throw NetworkError.requestFailed(error)
         }
     }
@@ -274,6 +262,9 @@ class NetworkService: NetworkServiceProtocol {
             method: .post,
             body: TokenRequest(deviceId: deviceId)
         )
+        
+        // Don't log token
+        logger.debug("Auth token received")
         
         // Save token for future requests
         self.authToken = response.token

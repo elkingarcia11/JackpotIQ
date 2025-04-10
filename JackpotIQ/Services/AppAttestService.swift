@@ -47,22 +47,24 @@ actor AppAttestService {
             let challenge: String
         }
         
-        logger.debug("APP-ATTEST: Making request to /api/auth/app-attest-challenge")
+        // Minimal logging without sensitive details
+        logger.debug("APP-ATTEST: Requesting challenge")
         
         let response: ChallengeResponse = try await networkService.performRequest(
             endpoint: "auth/app-attest-challenge",
             method: .get
         )
         
-        logger.debug("APP-ATTEST: Received challenge: \(response.challenge)")
+        logger.debug("APP-ATTEST: Challenge received")
         
         // Convert base64 challenge to Data
         guard let challengeData = Data(base64Encoded: response.challenge) else {
-            logger.error("APP-ATTEST: Failed to decode challenge data from base64")
+            logger.error("APP-ATTEST: Failed to decode challenge data")
             throw AppAttestError.invalidChallengeData
         }
         
-        logger.debug("APP-ATTEST: Successfully decoded challenge - length: \(challengeData.count) bytes")
+        // Don't log challenge length or any details about it
+        logger.debug("APP-ATTEST: Challenge decoded successfully")
         
         // Save the challenge for later use
         self.savedChallenge = challengeData
@@ -79,7 +81,8 @@ actor AppAttestService {
             self.keyID = keyID
             return keyID
         } catch {
-            logger.error("Failed to generate key: \(error.localizedDescription)")
+            // Don't log the actual error details
+            logger.error("APP-ATTEST: Key generation failed")
             throw AppAttestError.keyGenerationFailed(error: error)
         }
     }
@@ -89,49 +92,28 @@ actor AppAttestService {
             throw AppAttestError.notAvailable
         }
         
-        logger.debug("APP-ATTEST: Generating attestation for keyID: \(keyID)")
-        logger.debug("APP-ATTEST: Challenge data (hex): \(challenge.hexDescription)")
+        // Remove keyID and challenge data from logs
+        logger.debug("APP-ATTEST: Generating attestation")
         
         do {
             let attestation = try await attestationService.attestKey(keyID, clientDataHash: challenge)
-            logger.debug("APP-ATTEST: Generated attestation successfully - length: \(attestation.count) bytes")
-            logger.debug("APP-ATTEST: Base64 attestation: \(attestation.base64EncodedString())")
+            // Don't log attestation details
+            logger.debug("APP-ATTEST: Attestation generated successfully")
             
-            // Add detailed diagnostic parsing of the attestation data
-            printAttestationDetails(attestation)
+            // Remove diagnostic parsing which logs sensitive data
+            // printAttestationDetails(attestation)
             
             return attestation
         } catch {
-            logger.error("Failed to generate attestation: \(error.localizedDescription)")
-            logger.error("APP-ATTEST: Attestation generation failed with error: \(error.localizedDescription)")
+            // Generic error without details
+            logger.error("APP-ATTEST: Attestation generation failed")
             throw AppAttestError.attestationFailed(error: error)
         }
     }
     
     /// Prints detailed diagnostic information about the attestation structure
     private func printAttestationDetails(_ attestation: Data) {
-        logger.debug("APP-ATTEST: ====== ATTESTATION DIAGNOSTIC INFO ======")
-        
-        // Print the first few bytes to see the format markers
-        if attestation.count > 16 {
-            logger.debug("APP-ATTEST: First 16 bytes: \(attestation.prefix(16).hexDescription)")
-        }
-        
-        // Check for CBOR format markers (typically starts with 0xD2)
-        if attestation.first == 0xD2 {
-            logger.debug("APP-ATTEST: Format appears to be CBOR (starts with 0xD2)")
-        } else if attestation.first == 0x30 {
-            logger.debug("APP-ATTEST: Format appears to be ASN.1 DER (starts with 0x30)")
-        } else {
-            logger.debug("APP-ATTEST: Format marker: 0x\(String(format: "%02X", attestation.first ?? 0))")
-        }
-        
-        // Try to detect if it's a COSE_Sign1 structure
-        if attestation.count > 4 && attestation[0] == 0x84 {
-            logger.debug("APP-ATTEST: Possible COSE_Sign1 structure detected")
-        }
-        
-        logger.debug("APP-ATTEST: ========================================")
+        // This method has been intentionally disabled to prevent logging sensitive data
     }
     
     private func verifyAttestation(keyID: String, challenge: Data, attestation: Data) async throws -> String {
@@ -145,7 +127,7 @@ actor AppAttestService {
             let token: String
         }
         
-        logger.debug("APP-ATTEST: Verifying attestation")
+        logger.debug("APP-ATTEST: Starting attestation verification")
         
         let requestBody = VerifyRequest(
             keyID: keyID,
@@ -163,7 +145,8 @@ actor AppAttestService {
             logger.debug("APP-ATTEST: Verification successful")
             return response.token
         } catch {
-            logger.error("APP-ATTEST: Verification failed: \(error.localizedDescription)")
+            // Don't log specific error details
+            logger.error("APP-ATTEST: Verification failed")
             throw error
         }
     }
