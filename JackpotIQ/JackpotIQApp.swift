@@ -4,8 +4,8 @@ import OSLog
 
 @main
 struct JackpotIQApp: App {
-    @State private var networkService = NetworkService(configuration: .developmentFallback)
-    @StateObject private var authService = AuthService(networkService: NetworkService(configuration: .developmentFallback))
+    @State private var networkService = NetworkService(configuration: .current)
+    @StateObject private var authService = AuthService(networkService: NetworkService(configuration: .current))
     @State private var isShowingSplash = true
     @State private var startFadeContent = false
     private let logger = Logger(subsystem: "com.jackpotiq.app", category: "AppDelegate")

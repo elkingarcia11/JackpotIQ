@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import OSLog
+import Security
 
 enum NetworkError: Error, LocalizedError {
     case invalidURL
@@ -9,6 +10,7 @@ enum NetworkError: Error, LocalizedError {
     case decodingFailed(Error)
     case serverError(status: Int, message: String?)
     case unauthorizedError
+    case invalidRequest(message: String)
     
     var errorDescription: String? {
         switch self {
@@ -24,6 +26,8 @@ enum NetworkError: Error, LocalizedError {
             return "Server error (\(status)): \(message ?? "No details provided")"
         case .unauthorizedError:
             return "Unauthorized access"
+        case .invalidRequest(let message):
+            return message
         }
     }
 }
@@ -37,29 +41,19 @@ enum HTTPMethod: String {
 
 struct NetworkConfiguration {
     let baseURL: String
-    let debug: Bool
-    
-    static let development = NetworkConfiguration(
-        baseURL: "https://jackpot-iq-api-669259029283.us-central1.run.app/api/",
-        debug: true
-    )
-    
-    // Alternative configuration for simulators that can't connect to host.docker.internal
-    static let developmentFallback = NetworkConfiguration(
-        baseURL: "https://jackpot-iq-api-669259029283.us-central1.run.app/api/",
-        debug: true
-    )
     
     static let production = NetworkConfiguration(
-        baseURL: "https://api.jackpotiq.com/api/", // Replace with production URL
-        debug: false
+        baseURL: "https://jackpot-iq-api-669259029283.us-central1.run.app/api/"
     )
+    
+    static let current = production
 }
 
 // MARK: - Authentication Models
 struct AppAttestRequest: Codable {
     let attestation: String
     let challenge: String
+    let keyID: String
 }
 
 struct AppAttestResponse: Codable {
@@ -90,7 +84,7 @@ struct LotterySearchRequest: Codable {
 
 protocol NetworkServiceProtocol {
     // Authentication
-    func verifyAppAttest(attestation: String, challenge: String) async throws -> AppAttestResponse
+    func verifyAppAttest(attestation: String, challenge: String, keyID: String) async throws -> AppAttestResponse
     func generateToken(deviceId: String) async throws -> TokenResponse
     
     // Statistics
@@ -113,11 +107,9 @@ class NetworkService: NetworkServiceProtocol {
     let configuration: NetworkConfiguration
     private let logger = Logger(subsystem: "com.jackpotiq.app", category: "NetworkService")
     private let session: URLSession
+    private let tokenKey = "com.jackpotiq.app.authToken"
     
-    // For testing purposes - set to false to bypass authentication
-    private let requireAuthentication = false
-    
-    init(configuration: NetworkConfiguration = .developmentFallback) {
+    init(configuration: NetworkConfiguration = .current) {
         self.configuration = configuration
         
         guard let url = URL(string: configuration.baseURL) else {
@@ -125,57 +117,80 @@ class NetworkService: NetworkServiceProtocol {
         }
         self.baseURL = url
         
-        // Print the base URL for debugging
-        print("DEBUG: Base URL initialized as: \(self.baseURL.absoluteString)")
-        
-        // Create a custom session configuration that allows insecure loads for development
+        // Create a standard session configuration
         let sessionConfig = URLSessionConfiguration.default
-        if configuration.debug {
-            // This is for development only - allows connection to localhost, etc.
-            sessionConfig.timeoutIntervalForRequest = 60 // Increase timeout to 60 seconds
-            sessionConfig.timeoutIntervalForResource = 60 // Increase timeout to 60 seconds
-            // Disable ATS for development only
-            sessionConfig.waitsForConnectivity = true
-            // Allow insecure HTTP loads for development
-            sessionConfig.allowsExpensiveNetworkAccess = true
-            sessionConfig.allowsConstrainedNetworkAccess = true
-            
-            #if DEBUG
-            // This is needed because we're setting ATS exceptions in Info.plist instead
-            // but the environment might not pick it up correctly
-            if let dict = Bundle.main.object(forInfoDictionaryKey: "NSAppTransportSecurity") as? [String: Any] {
-                sessionConfig.connectionProxyDictionary = ["NSAppTransportSecurity": dict]
-            }
-            #endif
-            
-            logger.debug("Using development session configuration with ATS exceptions")
-        }
+        sessionConfig.timeoutIntervalForRequest = 30
+        sessionConfig.timeoutIntervalForResource = 300
         self.session = URLSession(configuration: sessionConfig)
         
-        // Load token from secure storage if available
-        if let token = UserDefaults.standard.string(forKey: "authToken") {
-            self.authToken = token
-            logger.debug("Loaded auth token from UserDefaults")
+        // Load token from keychain if available
+        self.authToken = loadTokenFromKeychain()
+    }
+    
+    private func loadTokenFromKeychain() -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: tokenKey,
+            kSecReturnData as String: true
+        ]
+        
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        
+        guard status == errSecSuccess,
+              let data = result as? Data,
+              let token = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+        
+        return token
+    }
+    
+    private func saveTokenToKeychain(_ token: String) {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: tokenKey,
+            kSecValueData as String: token.data(using: .utf8)!
+        ]
+        
+        // First try to delete any existing token
+        SecItemDelete(query as CFDictionary)
+        
+        // Then add the new token
+        let status = SecItemAdd(query as CFDictionary, nil)
+        if status != errSecSuccess {
+            logger.error("Failed to save token to keychain: \(status)")
+        }
+    }
+    
+    private func deleteTokenFromKeychain() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: tokenKey
+        ]
+        
+        let status = SecItemDelete(query as CFDictionary)
+        if status != errSecSuccess && status != errSecItemNotFound {
+            logger.error("Failed to delete token from keychain: \(status)")
         }
     }
     
     // Set authentication token for authorized requests
     func setAuthToken(_ token: String) {
         self.authToken = token
-        UserDefaults.standard.set(token, forKey: "authToken")
-        logger.debug("Auth token set and saved to UserDefaults")
+        saveTokenToKeychain(token)
     }
     
     // Clear authentication token
     func clearAuthToken() {
         self.authToken = nil
-        UserDefaults.standard.removeObject(forKey: "authToken")
-        logger.debug("Auth token cleared from memory and UserDefaults")
+        deleteTokenFromKeychain()
     }
     
     func performRequest<T: Decodable>(endpoint: String, method: HTTPMethod = .get, body: Encodable? = nil) async throws -> T {
         // Create URL and request
         guard let url = URL(string: endpoint, relativeTo: self.baseURL) else {
+            logger.error("Invalid URL: \(endpoint)")
             throw NetworkError.invalidURL
         }
         
@@ -186,39 +201,39 @@ class NetworkService: NetworkServiceProtocol {
         // Add auth token if available
         if let token = authToken {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            logger.debug("Auth token present")
+        } else {
+            logger.debug("No auth token available")
         }
         
         // Add body if provided
         if let body = body {
-            request.httpBody = try JSONEncoder().encode(body)
-        }
-        
-        // Enhanced request logging
-        let isAppAttestChallengeEndpoint = endpoint == "auth/app-attest-challenge"
-        if configuration.debug || isAppAttestChallengeEndpoint {
-            // Only log that a request was made, no details
-            logger.debug("Making API request")
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let jsonData = try encoder.encode(body)
+            request.httpBody = jsonData
+            
+            // Log only non-sensitive information
+            if endpoint == "auth/verify-app-attest" {
+                logger.debug("Sending attestation request")
+            } else if endpoint == "auth/token" {
+                logger.debug("Sending token request")
+            } else {
+                logger.debug("Request body present")
+            }
         }
         
         do {
-            if configuration.debug {
-                logger.debug("Attempting connection")
-            }
-            
-            // Use our custom session instead of the shared one
+            logger.debug("Making request to: \(endpoint)")
             let (data, response) = try await session.data(for: request)
-            
-            // Enhanced response logging
-            if configuration.debug || isAppAttestChallengeEndpoint {
-                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-                // Only log status code, not response body
-                logger.debug("Response received: \(statusCode)")
-            }
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 logger.error("Invalid response type")
                 throw NetworkError.invalidResponse
             }
+            
+            // Log only status code, not headers
+            logger.debug("Response status: \(httpResponse.statusCode)")
             
             // Handle HTTP status codes
             switch httpResponse.statusCode {
@@ -234,25 +249,35 @@ class NetworkService: NetworkServiceProtocol {
                 logger.error("Unauthorized access")
                 throw NetworkError.unauthorizedError
             default:
-                // Don't log raw error messages which might contain sensitive info
-                logger.error("Server error (\(httpResponse.statusCode))")
+                logger.error("Server error: \(httpResponse.statusCode)")
                 throw NetworkError.serverError(status: httpResponse.statusCode, message: nil)
             }
-        } catch let error as NetworkError {
-            throw error
         } catch {
-            logger.error("Network request failed")
+            logger.error("Request failed")
             throw NetworkError.requestFailed(error)
         }
     }
     
     // MARK: - Authentication Methods
     
-    func verifyAppAttest(attestation: String, challenge: String) async throws -> AppAttestResponse {
+    func verifyAppAttest(attestation: String, challenge: String, keyID: String) async throws -> AppAttestResponse {
+        logger.debug("Verifying app attestation")
+        
+        // Ensure the attestation is properly formatted
+        let formattedAttestation = attestation.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Create the request body
+        let requestBody = AppAttestRequest(
+            attestation: formattedAttestation,
+            challenge: challenge,
+            keyID: keyID
+        )
+        
+        // Make the request
         return try await performRequest(
             endpoint: "auth/verify-app-attest",
             method: .post,
-            body: AppAttestRequest(attestation: attestation, challenge: challenge)
+            body: requestBody
         )
     }
     
@@ -263,12 +288,9 @@ class NetworkService: NetworkServiceProtocol {
             body: TokenRequest(deviceId: deviceId)
         )
         
-        // Don't log token
-        logger.debug("Auth token received")
-        
         // Save token for future requests
         self.authToken = response.token
-        UserDefaults.standard.set(response.token, forKey: "authToken")
+        saveTokenToKeychain(response.token)
         
         return response
     }
@@ -357,11 +379,6 @@ class NetworkService: NetworkServiceProtocol {
         let mainNumbers = Array(optimizedNumbers.prefix(5))
         let specialBall = optimizedNumbers.last!
         
-        if configuration.debug {
-            // Remove specific combination info
-            logger.debug("Generated optimized combination")
-        }
-        
         return OptimizedCombination(
             mainNumbers: mainNumbers,
             specialBall: specialBall,
@@ -384,11 +401,6 @@ class NetworkService: NetworkServiceProtocol {
         
         let result: RandomNumberResponse = try await performRequest(endpoint: endpoint)
         
-        if configuration.debug {
-            // Remove specific combination info
-            logger.debug("Generated random combination")
-        }
-        
         return RandomCombination(
             mainNumbers: result.numbers,
             specialBall: result.specialBall,
@@ -402,11 +414,6 @@ class NetworkService: NetworkServiceProtocol {
             endpoint: "lottery?type=\(type.rawValue)&limit=\(pageSize)&offset=\((page-1)*pageSize)"
         )
         
-        if configuration.debug {
-            // Log only count, not actual combinations
-            logger.debug("Received \(latestDraws.count) latest combinations")
-        }
-        
         // Create a LatestCombinationsResponse from the array
         return LatestCombinationsResponse(
             combinations: latestDraws,
@@ -415,30 +422,69 @@ class NetworkService: NetworkServiceProtocol {
         )
     }
     
-    func searchLotteryDraws(type: LotteryType, numbers: [Int], specialBall: Int?) async throws -> [LatestCombination] {
-        // Create a proper Encodable struct instead of a dictionary
-        let searchRequest = LotterySearchRequest(
-            type: type.rawValue,
-            numbers: numbers.isEmpty ? nil : numbers,
-            specialBall: specialBall
-        )
+    // MARK: - Lottery Search Methods
+    
+    func searchLotteryDraws(type: LotteryType, numbers: [Int], specialBall: Int? = nil) async throws -> [LatestCombination] {
+        // Log only non-sensitive information
+        logger.debug("Searching lottery draws for type: \(type.rawValue)")
         
-        if configuration.debug {
-            // Log without specifics
-            logger.debug("Searching for lottery draws")
+        // Format numbers as comma-separated string for the query parameter
+        let numbersString = numbers.map { String($0) }.joined(separator: ",")
+        
+        // Build the URL with query parameters
+        var urlComponents = URLComponents(url: baseURL.appendingPathComponent("lottery/search"), resolvingAgainstBaseURL: true)!
+        urlComponents.queryItems = [
+            URLQueryItem(name: "type", value: type.rawValue),
+            URLQueryItem(name: "numbers", value: numbersString)
+        ]
+        
+        // Add special ball if provided
+        if let specialBall = specialBall {
+            urlComponents.queryItems?.append(URLQueryItem(name: "specialBall", value: String(specialBall)))
         }
         
-        // Response will be an array of LatestCombination objects
-        let results: [LatestCombination] = try await performRequest(
-            endpoint: "lottery/search",
-            method: .post,
-            body: searchRequest
-        )
-        
-        if configuration.debug {
-            // Log only count, not actual results
-            logger.debug("Found \(results.count) matching lottery draws")
+        guard let url = urlComponents.url else {
+            logger.error("Failed to construct search URL")
+            throw NetworkError.invalidURL
         }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"  // Using GET with query parameters
+        
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            logger.debug("Auth token present for search request")
+        } else {
+            logger.warning("No auth token available for search request")
+        }
+        
+        // Log only the endpoint path, not the full URL with parameters
+        logger.debug("Making search request to lottery/search endpoint")
+        let (data, response) = try await session.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            logger.error("Invalid response type for search request")
+            throw NetworkError.invalidResponse
+        }
+        
+        logger.debug("Search response status: \(httpResponse.statusCode)")
+        
+        if httpResponse.statusCode == 401 {
+            logger.error("Unauthorized search request")
+            throw NetworkError.unauthorizedError
+        }
+        
+        guard httpResponse.statusCode == 200 else {
+            logger.error("Server error during search: \(httpResponse.statusCode)")
+            throw NetworkError.serverError(status: httpResponse.statusCode, message: nil)
+        }
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let results = try decoder.decode([LatestCombination].self, from: data)
+        
+        // Log only the count, not the actual results
+        logger.debug("Search completed successfully with \(results.count) results")
         
         return results
     }

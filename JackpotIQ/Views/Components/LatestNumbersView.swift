@@ -58,35 +58,11 @@ struct LatestNumbersView: View {
                 }
                 
                 // Search note
-                Text("Searching for a specific combination can help you determine whether it's statistically worth playing, as no winning combination has ever repeated.")
+                Text("Note: Past winning numbers are useful for reference, but not for prediction. Every draw is independent, and all combinations have an equal chance—regardless of past appearances. Avoiding past numbers is a common misconception known as the Gambler's Fallacy.")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 4)
-                
-                // Search Active Indicator
-                if viewModel.searchState.isSearching {
-                    HStack {
-                        Text("Search Results")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
-                        
-                        Button(action: { viewModel.clearSearch() }) {
-                            Label("Clear Search", systemImage: "xmark.circle.fill")
-                                .font(.body.weight(.medium))
-                                .foregroundColor(.red)
-                        }
-                    }
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 20)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemBackground))
-                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-                    )
-                }
             }
             .padding()
             .background(Color(.systemBackground))
@@ -94,12 +70,78 @@ struct LatestNumbersView: View {
             // Results Section
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    // Title with simplified text
-                    Text("Latest Winning Numbers")
-                        .font(.headline)
-                        .foregroundColor(.primary)
+                    // Title with conditional text based on search state
+                    if viewModel.searchState.isSearching {
+                        VStack(spacing: 12) {
+                            HStack {
+                                Text("Search Results")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                Spacer()
+                                
+                                Button(action: { viewModel.clearSearch() }) {
+                                    Label("Clear", systemImage: "xmark.circle.fill")
+                                        .font(.body.weight(.medium))
+                                        .foregroundColor(.red)
+                                }
+                            }
+                            .padding(.horizontal, 4)
+                            
+                            // Display the search query as a button
+                            Button(action: { viewModel.searchState.showSearchSheet = true }) {
+                                HStack(spacing: 12) {
+                                    // Main numbers
+                                    ForEach(Array(viewModel.searchState.searchNumbers).sorted(), id: \.self) { number in
+                                        NumberBall(number: number, size: 30, color: .blue)
+                                    }
+                                    
+                                    // Special ball if selected
+                                    if let specialBall = viewModel.searchState.searchSpecialBall {
+                                        NumberBall(
+                                            number: specialBall,
+                                            size: 30, color: .clear,
+                                            background: viewModel.type == .megaMillions ?
+                                                LinearGradient(
+                                                    colors: [Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9), Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.9)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ) :
+                                                LinearGradient(
+                                                    colors: [Color.red.opacity(0.9), Color.red.opacity(0.9)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                            isSpecialBall: true
+                                        )
+                                    }
+                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.blue.opacity(0.1))
+                                )
+                            }
+                            .padding(.top, 4)
+                        }
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(.systemBackground))
+                                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                        )
+                        .padding(.horizontal, 16)
                         .padding(.vertical, 8)
+                    } else {
+                        Text("Latest Winning Numbers")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 8)
+                    }
                     
                     // Use results with proper filtering
                     let results = viewModel.searchState.isSearching ?

@@ -17,20 +17,53 @@ JackpotIQ is an iOS application designed to provide lottery enthusiasts with too
 - **Check Your Numbers:** Enter your combination and see if it has matched winning numbers in past drawings.
 - **Dual Lottery Support:** Full features available for both Mega Millions and Powerball.
 - **Modern Interface:** Built natively with SwiftUI for a clean and responsive user experience.
+- **App Attestation:** Secure authentication using Apple's App Attest framework.
 
 ## Technology Stack
 
 - **Frontend:** SwiftUI
 - **Architecture:** MVVM (Model-View-ViewModel)
 - **Language:** Swift
+- **Authentication:** App Attest, JWT
+- **Data Storage:** Keychain for secure token storage
 
 ## Backend
 
-JackpotIQ relies on a backend service (via `NetworkService`) to fetch up-to-date lottery results, historical data, and perform statistical calculations. _(Note: Details of the backend API are not included in this repository)_.
+JackpotIQ connects to a secure API hosted on Google Cloud Run:
+
+- **Base URL:** `https://jackpot-iq-api-669259029283.us-central1.run.app/api/`
+- **Authentication:** JWT token-based authentication
+- **Key Endpoints:**
+  - `/auth/verify-app-attest`: Verifies device attestation
+  - `/auth/token`: Generates authentication tokens
+  - `/lottery/search`: Searches for matching lottery combinations
+  - `/lottery`: Fetches latest lottery results
+  - `/stats`: Retrieves statistical data
+
+### API Response Format
+
+The API returns lottery data in the following format:
+
+```json
+[
+  {
+    "specialBall": 10,
+    "date": "2023-01-10",
+    "numbers": [1, 2, 3, 4, 5],
+    "type": "mega-millions"
+  }
+]
+```
 
 ## Getting Started
 
-1.  Clone the repository.
-2.  Open `JackpotIQ.xcodeproj` in Xcode.
-3.  Ensure you have a compatible backend service running and configured in `NetworkService`.
-4.  Build and run the application on a simulator or physical device.
+1. Clone the repository.
+2. Open `JackpotIQ.xcodeproj` in Xcode.
+3. Build and run the application on a simulator or physical device.
+
+## Security Notes
+
+- The app uses App Attest for secure device verification
+- Authentication tokens are stored securely in the Keychain
+- All API requests are made over HTTPS
+- Sensitive data is never logged or stored in plain text
